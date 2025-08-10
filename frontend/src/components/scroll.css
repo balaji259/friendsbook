@@ -1,0 +1,14 @@
+.post-component-container::-webkit-scrollbar {
+    display: none; 
+    background-color:transparent;
+  }
+
+
+.sidebar-container::-webkit-scrollbar {
+    display: none;
+  }
+
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/images/updatedlogo.png"  style="border-radius: 80px" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FriendsBook</title>
+  </head>
+  <body>
+    <div id="root"></div>
+
+<!-- This is necessary so the global function is ready before script loads -->
+<script>
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement(
+      {
+        pageLanguage: 'en',
+        includedLanguages: 'en,hi,ta,te,kn,ml,bn,mr,gu,pa,ur',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+      },
+      'google_translate_element'
+    );
+  }
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

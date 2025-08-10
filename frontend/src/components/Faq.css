@@ -1,0 +1,122 @@
+/* Basic Page Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .faq-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+  }
+  
+  /* Header */
+  .faq-header {
+    grid-column: span 2;
+    background: #3b5998;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .faq-header input {
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+  }
+  
+  /* Sidebar */
+/* Ensure Sidebar Always Stays Visible */
+.faq-sidebar {
+    display: block !important; /* Forces it to show */
+    visibility: visible !important; /* Ensures it's not hidden */
+    flex-shrink: 0; /* Prevents sidebar from disappearing in flex/grid */
+    height: 100vh; /* Ensures it fills height */
+    position: relative; /* Keep normal positioning */
+    z-index: 10; /* Ensure it doesn’t get overlapped */
+}
+
+/* Debugging Extra Fix - Remove Any 'display: none' */
+.faq-sidebar[style*="display: none"] {
+    display: block !important;
+}
+  
+  .faq-sidebar h2 {
+    color: #3b5998;
+    font-size: 16px;
+  }
+  
+  .faq-sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .faq-sidebar li {
+    margin-bottom: 8px;
+  }
+  
+  .faq-sidebar button {
+    width: 100%;
+    text-align: left;
+    padding: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: #3b5998;
+  }
+  
+  .faq-sidebar button.active {
+    background: #e7f0ff;
+    font-weight: bold;
+  }
+  
+  /* Main Content */
+  .faq-content {
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  /* Footer */
+  .faq-footer {
+    grid-column: span 2;
+    text-align: center;
+    padding: 10px;
+    font-size: 12px;
+    background: #f1f1f1;
+    border-top: 1px solid #ddd;
+  }
+  
+  .faq-footer a {
+    color: #3b5998;
+    text-decoration: none;
+  }
+  
+  /* 🌟 Mobile Styles */
+  @media (max-width: 768px) {
+    .faq-container {
+        display: flex;
+        flex-direction: row;
+        min-height: 100vh;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .faq-sidebar {
+        width: 35%;
+        min-width: 120px;
+        max-width: 150px;
+        overflow-y: auto;
+        background: white;
+        border-right: 1px solid #ddd;
+    }
+
+    .faq-content {
+        width: 65%;
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+}

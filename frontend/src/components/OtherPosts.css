@@ -1,0 +1,175 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+  
+  .App {
+    padding: 16px;
+    max-width: 100%;
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 10;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .button-container button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    transition: all 0.3s;
+  }
+  
+  .button-container button.active {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+  }
+  
+  .button-container button:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .posts-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    width: 100%;
+    padding: 16px;
+  }
+  
+  .grid-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .grid-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover; /* Ensures the image fits within the defined dimensions while maintaining aspect ratio */
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  
+  .grid-item video {
+    width: 100%;
+    height: 150px;
+    object-fit: cover; /* Ensures the image fits within the defined dimensions while maintaining aspect ratio */
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  
+
+  .grid-item p {
+    font-size: 14px;
+    color: #333;
+    word-wrap: break-word;
+    margin: 0;
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 50;
+     overflow: hidden; /*Prevents page scrolling when modal is open */ 
+}
+  
+  
+  /* Modal content */
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh; /* Ensures the modal fits within the viewport */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow-y: auto; /* Makes the modal scrollable if the content exceeds max-height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* Close button */
+  .close-button {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    z-index: 10; /* Ensures the button stays above the content */
+  }
+  .close-button:hover {
+    color: #000;
+  }
+  
+  /* Modal image */
+  .modal-image {
+    width: 100%;
+    max-height: 60vh; /* Ensures the image doesn't exceed the modal's max-height */
+    object-fit: contain; /* Maintains the aspect ratio while fitting the image */
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  
+  /* Modal caption */
+  .modal-caption {
+    font-size: 16px;
+    color: #333;
+    text-align:center;
+  }
+  
+  @media (max-width: 768px) {
+
+    .button-container button {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+
+    .grid-container {
+      gap: 12px;
+    }
+  
+    .grid-item {
+      padding: 6px;
+    }
+  
+    .grid-item img {
+      height: 120px;
+    }
+  
+    .grid-item p {
+      font-size: 12px;
+    }
+  }
+  

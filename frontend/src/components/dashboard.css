@@ -1,0 +1,320 @@
+/* Base Styles */
+
+
+.dashboard {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  padding-left:0px;
+  background-color: #d5d5d5;
+  border:none;
+  /* width: 90%; */
+  /* background-color: #dc2626; */
+}
+
+.sidebar {
+  background-color: #f3f4f6; 
+
+  padding-top: 1.5rem ;
+  padding-bottom:1.5rem;
+  padding-left:0rem;
+  padding-right:0rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  transition: all 0.3s ease-in-out;
+
+  align-items: flex-start;
+  border:none;
+}
+
+img{
+  height:16px;
+  width:auto;
+}
+
+.stacked-text {
+  display: inline-block;
+  text-align: center; /* Ensures proper alignment */
+  line-height: 1.2;  /* Adjust spacing between lines */
+}
+/* Top Menu */
+.menu {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  /* gap: 1.5rem; */
+  gap: 1rem;
+}
+
+.menu-item {
+  font-size: 1rem; /* Default size for large screens */
+  padding: 0.5rem 1rem;
+  /* text-align: left; */
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.menu-item{
+  display:flex;
+  /* justify-content: center; */
+  align-items:center;
+  justify-content: flex-start;
+
+}
+
+.menu-item:hover {
+  background-color: #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.logout {
+  margin-top: 2rem;
+  display:flex;
+  justify-content: flex-start;
+}
+
+.logout{
+  display: flex;
+  justify-content: flex-start;
+}
+
+.logout-btn {
+  width: 90%;
+  /* background-color: #ef4444; */
+  color: black;
+  padding: 0.5rem 1rem;
+  margin-left:8px;
+  font-size: 1rem; /* Default size for large screens */
+  border-radius: 0.5rem;
+  text-align:center;
+  /* border:2px solid black; */
+  cursor: pointer;
+  font-size: large;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+  background-color: #dc2626;
+}
+
+/* Position the tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Hidden by default */
+.tooltip-text {
+  visibility: hidden;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 8px 8px;
+  border-radius: 5px;
+  position: absolute;
+  left: 160%; /* Position above the icon */
+  /* top: 50%; */
+  transform: translateX(-50%);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  font-size: 12px;
+}
+
+/* Show tooltip on hover */
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+.iconpicture{
+  margin-right: 4px;
+}
+
+.menu-text::before {
+  content: "\A"; /* Line break */
+  white-space: pre; /* Ensure line break is recognized */
+}
+
+/* Remove line break on large screens */
+@media (min-width: 1025px) {
+  .menu-text::before {
+    content: ""; /* Remove the break */
+  }
+}
+
+
+
+@media (min-width: 1025px) {
+  .menu-text {
+    margin-left: 0.5rem; /* Adds space between icon and text */
+  }
+}
+
+
+
+/* Responsive Design */
+
+
+@media (max-width: 1750px) {
+  .sidebar {
+    width: 75%;
+  }
+
+  .menu-item {
+    font-size: 0.9rem;
+  }
+
+  .logout{
+    display: flex;
+    justify-content: center;
+  }
+
+  .logout-btn {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+}
+
+
+/* Medium Screens (Tablets) */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 100%;
+  }
+
+  .menu-item {
+    font-size: 0.9rem;
+  }
+
+  .logout-btn {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+}
+
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5;
+  color: #333;
+  font-family: Arial, sans-serif;
+}
+
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #ddd;
+  border-top: 5px solid #6c63ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.quote {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  color: #6c63ff;
+}
+
+
+/* Small Screens (Mobile Devices) */
+@media (max-width: 768px) {
+  .sidebar {
+    /* width: 18%; */
+    width:125%;
+    padding: 1rem;
+  }
+
+  .menu {
+    gap: 0.8rem; /* Reduced gap */
+    display:flex;
+    flex-direction: column;
+    align-items:flex-start;
+  }
+
+  .menu-item {
+    font-size: 0.85rem;
+    padding: 0.4rem ;
+  }
+
+  .logout-btn {
+    font-size: 0.85rem;
+    padding: 0.5rem;
+    /* margin-bottom:25px; */
+  }
+}
+
+/* Very Small Screens (300px Width) */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 100%;
+    padding: 0.5rem; /* Reduced padding */
+  }
+
+  .menu {
+    gap: 0.8rem; /* Reduced gap */
+    display:flex;
+    flex-direction: column;
+    align-items:flex-start;
+  }
+
+  .menu-item {
+    font-size: 0.4rem; /* Smaller font for compactness */
+    padding: 0.3rem 0.4rem; /* Compact padding */
+  }
+
+  .logout{
+    display:flex;
+    padding-left: 0px;
+    justify-content: flex-start;
+  }
+
+  .logout-btn {
+    font-size: 0.4rem;
+    padding-left:0px;
+    /* border:2px solid red; */
+  }
+}
+
+/* Extra Small Screens (Specifically for 300x600) */
+@media (max-width: 320px) {
+  .sidebar {
+    width: 12%; /* Smaller width */
+    padding: 0.4rem;
+  }
+
+  .menu {
+    gap: 0.5rem; /* Even tighter gap */
+  }
+
+  .menu-item {
+    font-size: 0.4rem; /* Further reduce font size */
+    line-height: 1.2; /* Maintain readability */
+    padding: 0.2rem 0.4rem; /* Tight padding */
+    white-space: normal; /* Allow text wrapping instead of overflow */
+    word-break: break-word; /* Break long words if necessary */
+  }
+
+  .logout-btn {
+    font-size: 0.7rem; /* Further reduce font size */
+    padding: 0.3rem 0.5rem; /* Compact padding */
+    margin-top: 0.5rem; /* Reduced margin */
+  }
+}
