@@ -56,7 +56,7 @@ useEffect(() => {
  
 
     // Pass the token during the connection
-  const newSocket = io(import.meta.env.VITE_BACKEND_URL, {
+  const newSocket = io("/", {
     auth: {
       token, // Include the token in the WebSocket handshake
     },

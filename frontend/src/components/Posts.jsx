@@ -683,7 +683,7 @@ const savePost = async (postId)  => {
 
 const copyPostIdToClipboard = (postId) => {
   const postUrl = `/posts/${postId}`; 
-  navigator.clipboard.writeText(`${import.meta.env.VITE_FRONTEND_URL}${postUrl}`)
+  navigator.clipboard.writeText(`https://friendsbook-app.onrender.com${postUrl}`)
     .then(() => toast.success("Post link copied! Share it anywhere."))
     .catch(err => console.error('Failed to copy:', err));
 };
