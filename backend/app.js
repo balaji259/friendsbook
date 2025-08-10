@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const bodyParser = require('body-parser');
 const verifyToken =require("./middleware/verify.js");
 const connectDB = require('./db/db');
 const authRouter = require('./routes/auth');
@@ -34,14 +33,10 @@ const cors = require('cors');
 app.use(express.json({ limit: '50mb' })); // Set limit to 10 MB
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Middleware
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(express.static(path.join(__dirname, '..','frontend','dist')));
-
 
 
 // app.use(cors(*));
@@ -102,142 +97,146 @@ app.get('/verify',verifyToken,(req,res)=>{
 });
 
 app.post('/send-notification', async (req, res) => {
-  try {
-    console.log("inside send notification route");
-      const { userId, senderId, type, title, body } = req.body;
-      console.log(req.body);
+  // try {
+  //   console.log("inside send notification route");
+  //     const { userId, senderId, type, title, body } = req.body;
+  //     console.log(req.body);
 
      
-      if (!userId || !senderId || !type || !title || !body) {
-        console.log("Missing fields");
-          return res.status(400).json({ success: false, message: "Missing required fields" });
-      }
+  //     if (!userId || !senderId || !type || !title || !body) {
+  //       console.log("Missing fields");
+  //         return res.status(400).json({ success: false, message: "Missing required fields" });
+  //     }
 
-      if(userId!=senderId){
+  //     if(userId!=senderId){
 
         
-        console.log("📩 New Notification Request:", req.body);
+  //       console.log("📩 New Notification Request:", req.body);
 
 
-    let notificationBody = body; 
+  //   let notificationBody = body; 
 
-      if(type==="Follow Notification"){
+  //     if(type==="Follow Notification"){
      
-      const sender = await User.findById(senderId);
-      if (!sender) {
-        return res.status(404).json({ success: false, message: "Sender not found" });
-      }
-      console.log("sender isername");
-      console.log(sender.username);
+  //     const sender = await User.findById(senderId);
+  //     if (!sender) {
+  //       return res.status(404).json({ success: false, message: "Sender not found" });
+  //     }
+  //     console.log("sender isername");
+  //     console.log(sender.username);
       
-      notificationBody = `${sender.username} followed you`;
-      console.log(notificationBody);
-    }
+  //     notificationBody = `${sender.username} followed you`;
+  //     console.log(notificationBody);
+  //   }
     
     
-    else if(type==="Like Notification"){
+  //   else if(type==="Like Notification"){
       
-      const sender = await User.findById(senderId);
-      if (!sender) {
-        return res.status(404).json({ success: false, message: "Sender not found" });
-      }
-      console.log("sender isername");
-      console.log(sender.username);
+  //     const sender = await User.findById(senderId);
+  //     if (!sender) {
+  //       return res.status(404).json({ success: false, message: "Sender not found" });
+  //     }
+  //     console.log("sender isername");
+  //     console.log(sender.username);
       
-      notificationBody = `${sender.username} liked your post`;
-      console.log(notificationBody);
+  //     notificationBody = `${sender.username} liked your post`;
+  //     console.log(notificationBody);
       
-    }
+  //   }
     
-    else if(type==='Comment Notification'){
-      console.log("inside comment notfication!");
-      // const sender = await User.findById(senderId);
-      const sender = await User.findById(senderId)
+  //   else if(type==='Comment Notification'){
+  //     console.log("inside comment notfication!");
+  //     // const sender = await User.findById(senderId);
+  //     const sender = await User.findById(senderId)
       
-      if (!sender) {
-        console.error("❌ Sender not found in DB");
-        return res.status(404).json({ success: false, message: "Sender not found" });
-      }
-      console.log("sender isername");
-      console.log(sender.username);
+  //     if (!sender) {
+  //       console.error("❌ Sender not found in DB");
+  //       return res.status(404).json({ success: false, message: "Sender not found" });
+  //     }
+  //     console.log("sender isername");
+  //     console.log(sender.username);
       
-      notificationBody = `${sender.username} commented on your post`;
-      console.log(notificationBody);
+  //     notificationBody = `${sender.username} commented on your post`;
+  //     console.log(notificationBody);
       
-    }
+  //   }
 
-    else if(type==='Profile View Notification'){
-      console.log("inside profile view notfication!");
-      // const sender = await User.findById(senderId);
-      const sender = await User.findById(senderId)
+  //   else if(type==='Profile View Notification'){
+  //     console.log("inside profile view notfication!");
+  //     // const sender = await User.findById(senderId);
+  //     const sender = await User.findById(senderId)
       
-      if (!sender) {
-        console.error("❌ Sender not found in DB");
-        return res.status(404).json({ success: false, message: "Sender not found" });
-      }
-      console.log("sender isername");
-      console.log(sender.username);
+  //     if (!sender) {
+  //       console.error("❌ Sender not found in DB");
+  //       return res.status(404).json({ success: false, message: "Sender not found" });
+  //     }
+  //     console.log("sender isername");
+  //     console.log(sender.username);
       
-      notificationBody = `${sender.username} viewed your profile`;
-      console.log(notificationBody);
+  //     notificationBody = `${sender.username} viewed your profile`;
+  //     console.log(notificationBody);
 
-    }
+  //   }
 
-    else if(type==='Message Notification'){
-      console.log("inside message notfication!");
-      // const sender = await User.findById(senderId);
-      const sender = await User.findById(senderId)
+  //   else if(type==='Message Notification'){
+  //     console.log("inside message notfication!");
+  //     // const sender = await User.findById(senderId);
+  //     const sender = await User.findById(senderId)
       
-      if (!sender) {
-        console.error("❌ Sender not found in DB");
-        return res.status(404).json({ success: false, message: "Sender not found" });
-      }
-      console.log("sender isername");
-      console.log(sender.username);
+  //     if (!sender) {
+  //       console.error("❌ Sender not found in DB");
+  //       return res.status(404).json({ success: false, message: "Sender not found" });
+  //     }
+  //     console.log("sender isername");
+  //     console.log(sender.username);
       
-      notificationBody = `${sender.username} messaged you !`;
-      console.log(notificationBody);
+  //     notificationBody = `${sender.username} messaged you !`;
+  //     console.log(notificationBody);
 
-    }
+  //   }
     
-    const notification = new Notification({
-      userId,      
-      senderId,    
-      type,        
-      title,
-      body: notificationBody,
-      isRead: false, // Mark as unread initially
-      });
+  //   const notification = new Notification({
+  //     userId,      
+  //     senderId,    
+  //     type,        
+  //     title,
+  //     body: notificationBody,
+  //     isRead: false, // Mark as unread initially
+  //     });
 
-      console.log(notification);
-      await notification.save();
-      console.log("notificatiion saved in schema");
+  //     console.log(notification);
+  //     await notification.save();
+  //     console.log("notificatiion saved in schema");
       
-      // Send notification (assuming sendNotification function is implemented)
-      await sendNotification(userId, title, notificationBody);
+  //     // Send notification (assuming sendNotification function is implemented)
+  //     await sendNotification(userId, title, notificationBody);
       
       
       
-      res.json({ success: true, message: "Notification sent and saved successfully" });
+  //     res.json({ success: true, message: "Notification sent and saved successfully" });
       
-    }
+  //   }
     
-    } catch (error) {
-      console.error("🚨 Error sending notification:", error);
-      res.status(500).json({ success: false, message: "Server error" });
-  }
+  //   } catch (error) {
+  //     console.error("🚨 Error sending notification:", error);
+  //     res.status(500).json({ success: false, message: "Server error" });
+  // }
 });
 
 
 
 
+const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist'); // Vite
+app.use(express.static(frontendDistPath));
+
+
 app.get('*',(req,res)=>{
-  res.sendFile(path.join(__dirname,'..','frontend','dist','index.html'));
+  res.sendFile(path.join(frontendDistPath,'index.html'));
 })
 
 
 // Start the server
-const PORT = 7000;
+const PORT = process.env.PORT || 7000;
 server.listen(PORT, () => {
   console.log(`Server is runningg on port ${PORT}`);
 });
