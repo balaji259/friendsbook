@@ -108,7 +108,7 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id
 **Backend:**
 ```bash
 cd server
-node server.js
+node app.js
 ```
 **Frontend:**
 ```bash
