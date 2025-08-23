@@ -67,12 +67,12 @@ cd friendsbook
 ### 2️⃣ Install dependencies
 **Backend:**
 ```bash
-cd server
+cd backend
 npm install
 ```
 **Frontend:**
 ```bash
-cd client
+cd frontend
 npm install
 ```
 
@@ -121,8 +121,8 @@ npm run dev
 ## 📂 Project Structure
 ```
 friendsbook/
-├── client/               # React frontend
-├── server/               # Node.js + Express backend
+├── backend/         
+├── frontend/               
 ├── README.md
 └── package.json
 ```
