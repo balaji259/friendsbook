@@ -394,16 +394,16 @@ const PostComponent = () => {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    console.log("setting posts!");
-    console.log(response.data);
+    // console.log("setting posts!");
+    // console.log(response.data);
 
     setPosts(response.data);
     setMediaContent(null); // added
     setPostContent(null);  // added
 
   } catch (error) {
-    console.error("Error fetching posts:", error);
-    alert(error.message || "Failed to fetch posts");
+    // console.error("Error fetching posts:", error);
+    alert(error?.message || "Failed to fetch posts");
   }
 };
 
@@ -422,7 +422,7 @@ const PostComponent = () => {
       
     }
     catch(e){
-      console.log(e);
+      console.log(e?.message);
     }
   }
 
@@ -441,7 +441,7 @@ const PostComponent = () => {
 
     setIsPosting(true); // Ensure state change
 
-    console.log("Posting state:", isPosting); // Debugging
+    // console.log("Posting state:", isPosting);
 
    
 
@@ -558,8 +558,8 @@ const PostComponent = () => {
     }
   );
 
-  const data = likeResponse.data; // Axios automatically parses JSON
-  console.log("likeddataresponse", data);
+  const data = likeResponse.data; 
+  // console.log("likeddataresponse", data);
 
   // Update state with new like status
   setPosts((prevPosts) =>
@@ -576,7 +576,7 @@ const PostComponent = () => {
 
   // ✅ Send notification only if post was liked (not unliked)
   if (data.liked === true) {
-    console.log("inside if - sending notification");
+    // console.log("inside if - sending notification");
 
     // await axios.post(
     //   "/send-notification",
@@ -595,7 +595,7 @@ const PostComponent = () => {
     //   }
     // );
 
-    console.log("✅ Notification Sent Successfully");
+    // console.log("✅ Notification Sent Successfully");
   }
 
 } catch (error) {
@@ -737,7 +737,7 @@ setPosts((prevPosts) => {
     }
   );
 
-  console.log("✅ Comment Added:", response.data);
+  // console.log("✅ Comment Added:", response.data);
 
   await fetchPosts();
   setNewComment('');
@@ -760,7 +760,7 @@ setPosts((prevPosts) => {
   //   }
   // );
 
-  console.log("✅ Notification Sent Successfully");
+  // console.log("✅ Notification Sent Successfully");
 
 } catch (error) {
   console.error("Error adding comment or sending notification:", error);
@@ -790,7 +790,7 @@ const handleAddReply = async (replyId) => {
     }
   );
 
-  console.log("✅ Reply Added:", response.data);
+  // console.log("✅ Reply Added:", response.data);
 
   await fetchPosts(); // Reload posts after reply is added
   clearReplyText(replyId);
@@ -910,7 +910,7 @@ useEffect(() => {
             }
           );
 
-          console.log("✅ View Notification Sent Successfully");
+          // console.log("✅ View Notification Sent Successfully");
          
 
           navigate('/other');
@@ -1016,7 +1016,7 @@ async function handleSaveEdit(commentId) {
       }
     );
 
-    console.log("Comment updated successfully:", response.data);
+    // console.log("Comment updated successfully:", response.data);
 
     // Update UI with new comment text
     setPosts(prevPosts =>
@@ -1348,8 +1348,7 @@ return (
       <div key={comment.commentId} style={{ margin: "10px 0" }}>
         <strong>{comment.user?.username || "Anonymous"}:</strong> 
 
-        {console.log("comment")}
-        {console.log(comment)}
+ 
 
         {/* {comment.text} */}
 

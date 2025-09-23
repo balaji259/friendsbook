@@ -186,51 +186,39 @@ const verifyKey = async (req,res) => {
         }
 }
 
-const loginUser = async (req,res) =>{
-    console.log("inside");
-    const { email, password } = req.body;
-  
-    
-        try {
-            // Find the user by email
-            const user = await User.findOne({ email });
-            if (!user) {
-                console.log("email not regstered");
-                return res.status(401).json({ error: 'Email not registered' });
-            }
-    
-            // Verify the password
-            if(password){
-            const isPasswordCorrect = await bcrypt.compare(password, user.password);
-            if (!isPasswordCorrect) {
-                
-                
-                return res.status(401).json({ error: 'Invalid password' });
-            }
-            }
-    
-               // If activeState is true, ask the user to enter the friendsbookKey
-               if (user.friendsbookKey.active) {
-                return res.status(200).json({ active: true }); // Flag to indicate the need for the friendsbookKey
-            }
-    
-            // Define token payload (you can include more user info if needed)
-            const payload = {
-                userId:user._id,
-                username: user.username,
-                email: user.email,
-            };
-            // Generate JWT token
-            const token = jwt.sign(payload, process.env.JWT_SECRET,{expiresIn:'30d'});
-    
-            // Send token to the client
-            res.json({ token,payload });
-            
-        } catch (error) {
-            console.error('Error during login:', err.message);
-            res.status(500).json({ message: 'Server error'});
-        }
-}
+const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ error: 'Email not registered' });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+
+    if (user.friendsbookKey.active) {
+      return res.status(200).json({ active: true });
+    }
+
+    const payload = {
+      userId: user._id,
+      username: user.username,
+      email: user.email,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+    return res.json({ token, payload });
+  } catch (error) {
+    console.error('Error during login:', error.message);
+    return res.status(500).json({ error: 'Server error' });
+  }
+};
+
 
 const checkEmail = async (req,res) =>{
   

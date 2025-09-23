@@ -62,8 +62,8 @@ const Navbar = ({ username, profilePic }) => {
       const res = await api.get(`/notifications/unread/count/${authuser.userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("res");
-      console.log(res);
+      // console.log("res");
+      // console.log(res);
 
       // ✅ Update notification count
       setNotificationCount(res.data.unreadCount);

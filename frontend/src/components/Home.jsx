@@ -47,28 +47,28 @@ useEffect(()=>{
 //for push notifications ! 
  
   onMessage(messaging, (payload) => {
-    console.log('Notification received:', payload);
+    // console.log('Notification received:', payload);
     alert(payload.notification.title + '\n' + payload.notification.body);
   });
 
   useEffect(() => {
-    console.log("in effect ");
-    console.log("user");
-    console.log(user);
+    // console.log("in effect ");
+    // console.log("user");
+    // console.log(user);
     if(user){
-      console.log("inside if stateent !");
-      console.log("user.userId");
-      console.log(user?.userId);
+      // console.log("inside if stateent !");
+      // console.log("user.userId");
+      // console.log(user?.userId);
       const requestPermission = async () => {
-        console.log('🔹 Requesting permission for notifications...');
+        // console.log('🔹 Requesting permission for notifications...');
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-          console.log('✅ Notification permission granted');
+          // console.log('✅ Notification permission granted');
           
           try {
             // 🔹 Get FCM Token
             const token = await getToken(messaging, { vapidKey: 'BIWYQ0KsMfECUsw5MC85iKTB6OGDQpP4p-lhZLFmHpyk9JS-6d5k2A_41do5zdbzkqe8ikyeMwRy6wo33nKisl4' });
-            console.log('✅ FCM Token:', token);
+            // console.log('✅ FCM Token:', token);
             
             // 🔹 Send token to backend
             await api.post('/update-fcm-token', {
@@ -76,7 +76,7 @@ useEffect(()=>{
               token,
             });
             
-            console.log('✅ FCM Token sent to backend!');
+            // console.log('✅ FCM Token sent to backend!');
           } catch (error) {
             console.error('🚨 Error getting FCM token:', error);
           }
@@ -130,7 +130,7 @@ const fetchUserDetails = async () => {
   }
 
   try {
-    console.log("start");
+    // console.log("start");
 
     const response = await api.get(`/user/getdetails`, {
       headers: {
@@ -138,15 +138,15 @@ const fetchUserDetails = async () => {
       },
     });
 
-    console.log("end");
+    // console.log("end");
 
-    console.log("response:", response.data);
+    // console.log("response:", response.data);
 
     
     return response.data; 
 
   } catch (error) {
-    console.error("Error fetching user details:", error);
+    // console.error("Error fetching user details:", error);
     alert("Error fetching user details");
   }
 };
@@ -192,14 +192,14 @@ const fetchUserDetails = async () => {
       try {
 
         const userDetails = await fetchUserDetails(token);
-        console.log(`userDetails:${userDetails}`);
+        // console.log(`userDetails:${userDetails}`);
         if (userDetails) {
           setCurrentUser({ username: userDetails.username, profilePic: userDetails.profilePic });
         }
       } catch (error) {
-        console.log("error");
-        console.log(error.message);
-        console.error("Error fetching user details:", error);
+        // console.log("error");
+        // console.log(error.message);
+        // console.error("Error fetching user details:", error);
       } finally {
         setIsLoading(false); 
       }
@@ -219,18 +219,18 @@ const fetchUserDetails = async () => {
         },
         
         })
-       console.log("setting res.data");
-       console.log(res.data);
+      //  console.log("setting res.data");
+      //  console.log(res.data);
         setUser(res.data);
     }
     catch(e){
-      console.log("error here in catch");
-      console.log(e);
+      // console.log("error here in catch");
+      console.log(e?.message);
     }
   }
   
   useEffect(()=>{
-    console.log("loading home page!");
+    // console.log("loading home page!");
     getUser();
     
 

@@ -13,7 +13,7 @@ root.render(
 
         <AuthProvider>
             
-        <GoogleOAuthProvider clientId="129468562219-ni6bo36s5io4e9s1k60bs5sncqtvmp7t.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId="316740076630-l3gfmjifhbrjq47lsobs434t787lrb72.apps.googleusercontent.com">
 
         <Toaster position="top-center" reverseOrder={false} />
 

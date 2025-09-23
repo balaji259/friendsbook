@@ -93,7 +93,7 @@ const LoginV2 = () => {
     
       setIsOtpSent(true);
     } catch (error) {
-      console.log(error.message);
+      // console.log(error.message);
       toast.error("Failed to send OTP");
     } finally {
       setLoading(false);
@@ -119,8 +119,9 @@ const LoginV2 = () => {
   // Handle registration after OTP verification
   const handleRegister = async () => {
     setLoading(true);
-    console.log("formData");
-    console.log(formData);
+  
+    // console.log("formData");
+    // console.log(formData);
     try {
       const birthday = `${formData.birthday.day}-${formData.birthday.month}-${formData.birthday.year}`;
       const { data } = await api.post("/auth/register", { ...formData, birthday });
@@ -152,6 +153,8 @@ const LoginV2 = () => {
 api.post(`/auth/login`, { email:loginemail, password:loginpassword })
     .then((response) => {
 
+      // console.log(response.data);
+
  
         if (response.data.active) {
           // Redirect to the enter key page with the email as a state
@@ -177,18 +180,16 @@ api.post(`/auth/login`, { email:loginemail, password:loginpassword })
        
     })
     .catch((error) => {
-     
-        console.log(error.message);
-     
-        toast.error(error?.message);
-    })
+  const msg = error.response?.data?.error || error.message || 'Something went wrong';
+  toast.error(msg);
+})
    
 }
 
 const handleGoogleLogin = async (x) => {
         
-  console.log("email");
-  console.log(x.email);
+  // console.log("email");
+  // console.log(x.email);
   api.post(`/auth/login`, { email: x.email })
       .then((response) => {
    
@@ -213,7 +214,7 @@ const handleGoogleLogin = async (x) => {
           }, 1000);
       })
       .catch((err) => {
-          console.log(err.message);
+          // console.log(err.message);
           toast.error("Something went wrong !", { duration: 2000 });
       });
 
@@ -228,7 +229,7 @@ const checkUser=async ()=>{
       .then((res)=> {
          
           navigate('/home');
-          console.log("success");
+          // console.log("success");
       })
       .catch((e) => {
           
@@ -238,7 +239,7 @@ const checkUser=async ()=>{
       
   }
   else{
-      console.log("no token");
+      // console.log("no token");
   }
 }
 
@@ -426,7 +427,7 @@ const checkUser=async ()=>{
                             handleGoogleLogin(x);
                         }}
                         onError={(err) => {
-                            console.log(err, "Login Failed");
+                            // console.log(err, "Login Failed");
                         }}
                       />
 
