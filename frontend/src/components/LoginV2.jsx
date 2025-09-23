@@ -187,38 +187,29 @@ api.post(`/auth/login`, { email:loginemail, password:loginpassword })
 }
 
 const handleGoogleLogin = async (x) => {
-        
-  // console.log("email");
-  // console.log(x.email);
-  api.post(`/auth/login`, { email: x.email })
-      .then((response) => {
-   
-          const token = response.data.token;
-          localStorage.setItem('token', token);
-         
+  api.post(`/auth/login`, { email: x.email, isGoogleLogin: true })
+    .then((response) => {
+      const token = response.data.token;
+      localStorage.setItem('token', token);
+      localStorage.setItem('authuser', JSON.stringify(response.data.payload));
 
-          localStorage.setItem('authuser', response.data.payload);
-        
-        setUser(response.data.payload);
-        setAuthUser(response.data.payload);
-        setToken(response.data.token);
+      setUser(response.data.payload);
+      setAuthUser(response.data.payload);
+      setToken(response.data.token);
 
-          toast.success('Login Successful', { duration: 2000 });
-          
-          
-          setTimeout(() => {
-              
-              connectSocket();
-            
-              navigate('/home');
-          }, 1000);
-      })
-      .catch((err) => {
-          // console.log(err.message);
-          toast.error("Something went wrong !", { duration: 2000 });
-      });
+      toast.success('Login Successful', { duration: 2000 });
 
+      setTimeout(() => {
+        connectSocket();
+        navigate('/home');
+      }, 1000);
+    })
+    .catch((err) => {
+      const msg = err.response?.data?.error || "Something went wrong!";
+      toast.error(msg, { duration: 2000 });
+    });
 };
+
 
 const checkUser=async ()=>{
   const token=localStorage.getItem("token");

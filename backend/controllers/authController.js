@@ -187,7 +187,7 @@ const verifyKey = async (req,res) => {
 }
 
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, isGoogleLogin } = req.body;
 
   try {
     const user = await User.findOne({ email });
@@ -195,12 +195,15 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ error: 'Email not registered' });
     }
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if (!isPasswordCorrect) {
-      return res.status(401).json({ error: 'Invalid password' });
+    // If Google login → skip password check
+    if (!isGoogleLogin) {
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (!isPasswordCorrect) {
+        return res.status(401).json({ error: 'Invalid password' });
+      }
     }
 
-    if (user.friendsbookKey.active) {
+    if (user.friendsbookKey?.active) {
       return res.status(200).json({ active: true });
     }
 
@@ -218,6 +221,7 @@ const loginUser = async (req, res) => {
     return res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 
 const checkEmail = async (req,res) =>{
