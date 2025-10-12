@@ -38,25 +38,6 @@ const LoginV2 = () => {
   const navigate = useNavigate();
   const {user, setUser ,socket, connectSocket}= useSocket();
 
-    const months = useMemo(
-    () => [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ],
-    []
-  );
-
-  const days = useMemo(() => Array.from({ length: 31 }, (_, i) => i + 1), []);
-  const years = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    return Array.from({ length: 100 }, (_, i) => currentYear - i);
-  }, []);
-
-  const fields = [
-    { label: "Month", options: months },
-    { label: "Day", options: days },
-    { label: "Year", options: years }
-  ];
 
 
   // Handle input changes
@@ -64,13 +45,6 @@ const LoginV2 = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle date selection
-  const handleDateChange = (key, value) => {
-    setFormData({
-      ...formData,
-      birthday: { ...formData.birthday, [key]: value },
-    });
-  };
 
   // Handle sending OTP
   const handleSendOtp = async (e) => {
@@ -123,8 +97,8 @@ const LoginV2 = () => {
     // console.log("formData");
     // console.log(formData);
     try {
-      const birthday = `${formData.birthday.day}-${formData.birthday.month}-${formData.birthday.year}`;
-      const { data } = await api.post("/auth/register", { ...formData, birthday });
+
+      const { data } = await api.post("/auth/register", { ...formData });
 
       localStorage.setItem("token", data.token);
 
@@ -481,90 +455,7 @@ const checkUser=async ()=>{
                   className="w-full p-4 bg-white/10 border-0 rounded-lg text-white placeholder-white/70 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300"
                 />
                 
-            
-
-              <div className="grid grid-cols-3 gap-4">
-  {fields.map(({ label, options }) => {
-    const name = label.toLowerCase(); // "month", "day", "year"
-    const value = formData.birthday[name];
-
-    return (
-      <div key={label} className="flex flex-col relative">
-        <label className="mb-1 text-sm text-white/80 font-medium">{label}</label>
-        <select
-          name={name}
-          value={value}
-          onChange={(e) => handleDateChange(name, e.target.value)}
-          className="p-3 bg-white/10 text-white rounded-lg focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-30 transition-all duration-300 appearance-none cursor-pointer"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-            backgroundPosition: 'right 0.75rem center',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '1.25em 1.25em',
-            paddingRight: '2.5rem'
-          }}
-        >
-          <option value="" disabled>
-            Select {label}
-          </option>
-          {options.map((opt) => (
-            <option
-              key={opt}
-              value={opt}
-              className="text-gray-900 bg-white py-2 px-3"
-            >
-              {opt}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  })}
-</div>
-
-                
-             
-
-
-                <div className="grid grid-cols-3 gap-2 mt-4">
-                <label className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-white/20 ${formData.gender === 'female' ? 'bg-white/20' : 'bg-white/10'}`}>
-                    <input
-                    type="radio"
-                    name="gender"
-                    value="female"
-                    checked={formData.gender === 'female'}
-                    onChange={handleChange}
-                    className="mr-2"
-                    />
-                    Female
-                </label>
-
-                <label className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-white/20 ${formData.gender === 'male' ? 'bg-white/20' : 'bg-white/10'}`}>
-                    <input
-                    type="radio"
-                    name="gender"
-                    value="male"
-                    checked={formData.gender === 'male'}
-                    onChange={handleChange}
-                    className="mr-2"
-                    />
-                    Male
-                </label>
-
-                <label className={`flex items-center p-3 rounded-lg cursor-pointer hover:bg-white/20 ${formData.gender === 'custom' ? 'bg-white/20' : 'bg-white/10'}`}>
-                    <input
-                    type="radio"
-                    name="gender"
-                    value="custom"
-                    checked={formData.gender === 'custom'}
-                    onChange={handleChange}
-                    className="mr-2"
-                    />
-                    Custom
-                </label>
-                </div>
-
-                
+              
                 <div className="text-xs text-white/80 mt-4">
                   By clicking Sign Up, you agree to our{' '}
                   <a href="#" className="text-white hover:underline">Terms</a>,{' '}

@@ -9,7 +9,9 @@ const Otp = require('../models/otp');
 
 // Setup Nodemailer transporter
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+  secure: true,
     auth: {
         user: process.env.TRANSPORTER_EMAIL, 
         pass: process.env.TRANSPORTER_PASS, 
@@ -34,6 +36,8 @@ const sendOTP = async (req,res) =>{
     await Otp.create({ email, otp, expiry });
 
     // Send the OTP via email
+
+      console.log("Sending OTP to", email, "via", process.env.TRANSPORTER_EMAIL);
     
     await transporter.sendMail({
         from: 'getsetotp@gmail.com', // Replace with your email
@@ -48,6 +52,7 @@ const sendOTP = async (req,res) =>{
     }
     catch(err){
         console.log(err.message);
+         console.error("SendMail error:", err && err.code, err && err.message);
         res.status(500).json({ error: 'Failed to send OTP. Try again later.' });
 
     }
@@ -89,7 +94,7 @@ const validateOTP = async (req,res) => {
 
 const registerUser = async (req,res) => {
     
-    const { username, fullname, email, gender, birthday, password } = req.body;
+    const { username, fullname, email, password } = req.body;
     try {
             // Check if a user with the same email already exists
             const existingUser = await User.findOne({ email });
@@ -105,8 +110,6 @@ const registerUser = async (req,res) => {
                 username,
                 fullname,
                 email,
-                gender,
-                dateOfBirth:birthday,
                 password: hashedPassword, // Save hashed password
             });
     
