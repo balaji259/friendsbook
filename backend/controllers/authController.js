@@ -9,15 +9,16 @@ const Otp = require('../models/otp');
 
 // Setup Nodemailer transporter
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-  secure: true,
-    auth: {
-        user: process.env.TRANSPORTER_EMAIL, 
-        pass: process.env.TRANSPORTER_PASS, 
-    },
+  host: 'smtp-relay.brevo.com',   
+  port: 587,                      
+  secure: false,                  
+  auth: {
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_PASS,
+  },
+  connectionTimeout: 20000,       
+  greetingTimeout: 20000,
 });
-
 
 const sendOTP = async (req,res) =>{
     try{
@@ -39,12 +40,13 @@ const sendOTP = async (req,res) =>{
 
       console.log("Sending OTP to", email, "via", process.env.TRANSPORTER_EMAIL);
     
-    await transporter.sendMail({
-        from: 'getsetotp@gmail.com', // Replace with your email
-        to: email,
-        subject: 'Your OTP for Registration',
-        text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
-        });
+        await transporter.sendMail({
+    from: `friendsbook <${process.env.BREVO_USER}>`, 
+    to: email,
+    subject: 'Your OTP for Registration',
+    text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
+});
+
 
     
         res.status(200).json({ message: 'OTP sent to email' });
