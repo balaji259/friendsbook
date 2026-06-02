@@ -5,11 +5,11 @@ import App from './App';  // Adjust the path as needed
 import Logo from './components/Logo';  // Adjust the path as needed
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
-import SuggestionSidebar from './components/Suggestions';
+import SuggestionSidebar from './components/Suggestions.jsx';
 import PostComponent from './components/Posts';
 import ReportPost from './components/Report';
 import SinglePost from './components/SinglePost';
-import Home from "./components/Home";
+import Home from "./components/Home.jsx";
 import UserDetails from "./components/Details";
 import Profile from "./components/Profile";
 import UserProfile from "./components/CheckProfile.jsx"; 

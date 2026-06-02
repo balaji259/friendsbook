@@ -64,21 +64,6 @@ app.use('/community',communityRouter);
 app.use('/events',eventRouter);
 app.use('/key',keyRouter);
 
-app.post('/test-email', async (req, res) => {
-  try {
-    await transporter.sendMail({
-      from: process.env.BREVO_USER,
-      to: 'balajipuneti259@gmail.com',
-      subject: 'Test Email',
-      text: 'Brevo SMTP is working!',
-    });
-    res.json({ ok: true });
-  } catch (err) {
-    console.error('Test email error:', err && err.message);
-    res.status(500).json({ ok: false, error: err && err.message });
-  }
-});
-
 
 
 app.post('/update-fcm-token', async (req, res) => {

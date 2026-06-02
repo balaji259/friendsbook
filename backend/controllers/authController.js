@@ -7,17 +7,13 @@ const crypto = require('crypto');
 const Otp = require('../models/otp');
 
 
-// Setup Nodemailer transporter
+// Setup Nodemailer transporter (Gmail)
 const transporter = nodemailer.createTransport({
-  host: 'smtp-relay.brevo.com',   
-  port: 587,                      
-  secure: false,                  
+  service: 'gmail',
   auth: {
-    user: process.env.BREVO_USER,
-    pass: process.env.BREVO_PASS,
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 20000,       
-  greetingTimeout: 20000,
 });
 
 const sendOTP = async (req,res) =>{
@@ -41,7 +37,7 @@ const sendOTP = async (req,res) =>{
       console.log("Sending OTP to", email, "via", process.env.TRANSPORTER_EMAIL);
     
         await transporter.sendMail({
-    from: `friendsbook <${process.env.BREVO_USER}>`, 
+    from: `friendsbook <${process.env.EMAIL_USER}>`, 
     to: email,
     subject: 'Your OTP for Registration',
     text: `Your OTP is ${otp}. It will expire in 5 minutes.`,

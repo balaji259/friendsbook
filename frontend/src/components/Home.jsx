@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import Navbar from "./Navbar";
 import Dashboard from "./Dashboard";
-import SuggestionsSidebar from "./Suggestions";
+import SuggestionsSidebar from "./Suggestions.jsx";
 import { toast } from "react-hot-toast";
 import PostsComponent from "./Posts";
 import Quote from "./Quote.jsx";

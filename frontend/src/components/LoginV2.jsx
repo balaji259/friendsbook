@@ -102,8 +102,7 @@ const LoginV2 = () => {
 
       localStorage.setItem("token", data.token);
 
-   
-       localStorage.setItem('authuser', data.payload);
+       localStorage.setItem('authuser', JSON.stringify(data.payload));
         
         setUser(data.payload);
         setAuthUser(data.payload);
@@ -137,7 +136,7 @@ api.post(`/auth/login`, { email:loginemail, password:loginpassword })
 
         const token = response.data.token;
         localStorage.setItem('token', token);
-        localStorage.setItem('authuser', response.data.payload);
+        localStorage.setItem('authuser', JSON.stringify(response.data.payload));
         
         setUser(response.data.payload);
         setAuthUser(response.data.payload);

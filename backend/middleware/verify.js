@@ -16,7 +16,7 @@ const verifyToken = async(req,res,next)=>{
         console.log(e.message);
         if(e.message == "jwt expired")
                 return res.status(401).json({message: "Login to continue"});
-        res.status(500).json({message: err.message})
+        res.status(500).json({message: e.message})
 
     }
 };
