@@ -29,6 +29,8 @@ const sendOTP = async (req,res) =>{
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiry = new Date(Date.now() + 5 * 60 * 1000); 
     
+
+    await Otp.deleteMany({ email });
     // Save OTP to the database
     await Otp.create({ email, otp, expiry });
 

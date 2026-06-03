@@ -49,6 +49,12 @@ const LoginV2 = () => {
   // Handle sending OTP
   const handleSendOtp = async (e) => {
     e.preventDefault();
+
+    if (!formData.username.trim() || !formData.fullname.trim() || !formData.email.trim() || !formData.password.trim()) {
+      toast.error("All fields are required");
+      return;
+    }
+
     setLoading(true);
     try {
     
@@ -144,14 +150,13 @@ api.post(`/auth/login`, { email:loginemail, password:loginpassword })
         localStorage.setItem('token', token);
         localStorage.setItem('authuser', JSON.stringify(response.data.payload));
         
-        setUser(response.data.payload);
+        setUser(response.data.payload);   // Bug fix #5: useEffect in SocketProvider auto-connects socket when user is set
         setAuthUser(response.data.payload);
         setToken(response.data.token);
         
         toast.success('Login Successful', { duration: 2000 });
 
           setTimeout(() => {
-              connectSocket();  
               navigate('/home'); 
           }, 1000);
       }
@@ -168,18 +173,24 @@ api.post(`/auth/login`, { email:loginemail, password:loginpassword })
 const handleGoogleLogin = async (x) => {
   api.post(`/auth/login`, { email: x.email, isGoogleLogin: true })
     .then((response) => {
+
+      // Bug fix #1: Google login must also respect the Friendsbook Key gate
+      if (response.data.active) {
+        navigate('/enter-key', { state: { email: x.email } });
+        return;
+      }
+
       const token = response.data.token;
       localStorage.setItem('token', token);
       localStorage.setItem('authuser', JSON.stringify(response.data.payload));
 
-      setUser(response.data.payload);
+      setUser(response.data.payload);   // Bug fix #5: useEffect in SocketProvider auto-connects socket when user is set
       setAuthUser(response.data.payload);
       setToken(response.data.token);
 
       toast.success('Login Successful', { duration: 2000 });
 
       setTimeout(() => {
-        connectSocket();
         navigate('/home');
       }, 1000);
     })
