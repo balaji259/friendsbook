@@ -79,12 +79,20 @@ const LoginV2 = () => {
   const handleValidateOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       await api.post("/auth/validate-otp", { email: formData.email, otp });
       toast.success("OTP validated successfully!");
-      await handleRegister();
     } catch (error) {
       toast.error("Invalid OTP");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await handleRegister();
+    } catch (error) {
+      // toast already shown inside handleRegister — just let finally clean up loading
     } finally {
       setLoading(false);
     }
@@ -92,8 +100,6 @@ const LoginV2 = () => {
 
   // Handle registration after OTP verification
   const handleRegister = async () => {
-    setLoading(true);
-  
     // console.log("formData");
     // console.log(formData);
     try {
@@ -112,13 +118,13 @@ const LoginV2 = () => {
       navigate("/home");
     } catch (error) {
       toast.error("Registration failed");
-    } finally {
-      setLoading(false);
+      throw error;
     }
   };
 
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
 
 
@@ -339,7 +345,7 @@ const checkUser=async ()=>{
           <div className="relative z-10 w-full max-w-md mx-auto">
             {!isSignUp ? (
               // Login Form
-              <div className="space-y-6">
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 <h2 className="text-3xl font-semibold mb-8">Log In</h2>
                 
                 <div className="space-y-4">
@@ -362,7 +368,7 @@ const checkUser=async ()=>{
                   />
                 </div>
                 
-                <button onClick={handleSubmit} className="w-full p-4 bg-white text-blue-700 font-bold rounded-lg hover:bg-gray-100 transform hover:-translate-y-1 transition-all duration-300 shadow-lg">
+                <button type="submit" disabled={loading} className="w-full p-4 bg-white text-blue-700 font-bold rounded-lg hover:bg-gray-100 transform hover:-translate-y-1 transition-all duration-300 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed">
                   Log In
                 </button>
 
@@ -411,7 +417,7 @@ const checkUser=async ()=>{
                     Sign Up
                   </span>
                 </div>
-              </div>
+              </form>
             ) : (
               // Sign Up Form
               <div className="space-y-4">

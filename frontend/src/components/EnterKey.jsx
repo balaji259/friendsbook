@@ -17,6 +17,13 @@ const EnterKey = () => {
     const { token, authuser, setToken, setAuthUser } = useContext(AuthContext);
     const navigate = useNavigate();
 
+  
+    useEffect(() => {
+        if (!location.state?.email) {
+            navigate('/');
+        }
+    }, []);
+
     const handleKeyChange = (e) => {
         // Allow all characters (letters, numbers, special characters)
         const value = e.target.value;

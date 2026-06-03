@@ -35,7 +35,7 @@ const activateKey = async (req,res) =>{
 }
 
 const deactivateKey = async(req,res) => {
-    const { userId } = req.body;
+    const userId = req.user.id;
 
   if (!userId) {
     return res.status(400).json({ message: 'User ID is required.' });
