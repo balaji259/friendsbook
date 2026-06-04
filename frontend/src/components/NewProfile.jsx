@@ -1,454 +1,533 @@
-import React from "react";
-import {useState,useEffect,useRef, useContext} from "react";
-import {useNavigate} from "react-router-dom";
-import { FiLogOut } from "react-icons/fi";
-import Quote from "./Quote";
-import { ChartNoAxesColumnDecreasing } from "lucide-react";
-import {AuthContext} from "./AuthContext";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import "./NewProfile.css";
+import { useNavigate } from "react-router-dom";
+import { FiLogOut, FiEdit2, FiMail, FiPhone, FiGlobe, FiMapPin, FiCalendar, FiHeart, FiBook, FiHome } from "react-icons/fi";
+import { AuthContext } from "./AuthContext";
 import api from "../api/api";
-// import "./NewProfile.css";
 
+// ── Constellation Banner ──────────────────────────────────────────────────────
+const ConstellationBanner = ({ seed = "user" }) => {
+  const canvasRef = useRef(null);
 
-const Profile = () => {
-
-  const [userData, setUserData] = useState(null);
-    const [sectionData, setSectionData] = useState([]);
-    const [savedData, setSavedData] = useState([]);
-    const [likedData,setLikedData]=useState([]);
-   
-    const [friends,setFriends]=useState([]);
-
-
-  const [activeSection, setActiveSection] = useState("posts");
-    const [error, setError] = useState(null);
-    const [friendSuggestions, setFriendSuggestions] = useState([]);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editableData, setEditableData] = useState({});
-    const [previewImage, setPreviewImage] = useState(null);const [suggestions, setSuggestions] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-
-    const [selectedPost, setSelectedPost] = useState(null);
-
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalContent, setModalContent] = useState([]);
-
-    const {token, authuser} = useContext(AuthContext);
-
-    const navigate=useNavigate();
-    const buttonRef = useRef(null);
-
-
-const fetchUserData = async () => {
-  try {
-
-    if (!token) {
-      alert('You are not logged in. Please log in to view your profile.');
-      
-      return;
-    }
-
-    const response = await api.get('/profile/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-  
-    console.log('User data:', response.data);
-    setUserData(response.data);
-
-  } catch (error) {
-    console.error('Failed to fetch user data:', error.message);
-    setError('Error fetching user data. Please try again later.');
-  }
-};
-
-
-  async function getFriendsDetails(userId) {
-    try {
-      console.log("before");
-      const response = await api.get(`/profile/getfriends/${userId}`);
-      console.log("after");
-      console.log(response);
- 
-      
-      setFriends(response.data);
-      // return friends; // Return the friends data
-    } catch (error) {
-      console.error('Error fetching friends:', error.message);
-      return []; // Return an empty array in case of an error
-    }
-  }
-
-  //fetching user data ....
-    useEffect(() => {
-      fetchUserData();
-     
-  }, []);
-
-  let formattedDateofBirth;
   useEffect(() => {
-    if (userData) {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
 
-       
+    // Seed a stable random using the username string
+    let seedVal = 0;
+    for (let i = 0; i < seed.length; i++) seedVal += seed.charCodeAt(i);
+    const rng = (() => { let s = seedVal; return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; })();
 
-        setEditableData({
-            username: userData.username || '',
-            fullname: userData.fullname || '',
-            email:userData.email || '',
+    const W = canvas.width;
+    const H = canvas.height;
 
-            relationshipStatus: userData.relationshipStatus,
-            bio: userData.bio,
-            profilePic: userData.profilePic,
-            dateOfBirth: userData.dateOfBirth|| '',
-            // dateOfBirth:convertToDateOfBirth(userData.dateOfBirth) || '',
-            collegeName: userData.collegeName || '',
-            bestFriend: userData.bestFriend || '',
-            interests: userData.interests || '',
-            gender:userData.gender || '',
-            favoriteSports: userData.favoriteSports || '',
-            favoriteGame: userData.favoriteGame || '',
-            favoriteMusic: userData.favoriteMusic || '',
-            favoriteMovie: userData.favoriteMovie || '',
-            favoriteAnime: userData.favoriteAnime || '',
-            favoriteActor: userData.favoriteActor || '',
-            highschool:userData.highschool || '',
-            hometown:userData.hometown || '',
-            interestedin:userData.interestedIn || '',
-            lookingfor:userData.lookingfor || '',
-            residence:userData.residence || '',
-            school:userData.school || '',
-            status:userData.status || '',
-            website:userData.website || '',
-            mobileNumber:userData.mobileNumber || '',
+    // Color palettes keyed by seed mod
+    const palettes = [
+      { bg: "#0d0d1a", primary: "#6c5ce7", secondary: "#a29bfe", accent: "#fd79a8" },
+      { bg: "#0a1628", primary: "#0984e3", secondary: "#74b9ff", accent: "#00cec9" },
+      { bg: "#0d1a0d", primary: "#00b894", secondary: "#55efc4", accent: "#fdcb6e" },
+      { bg: "#1a0d1a", primary: "#e84393", secondary: "#fd79a8", accent: "#a29bfe" },
+    ];
+    const pal = palettes[seedVal % palettes.length];
 
-        });
-      
-    }
-}, [userData]);
+    const numParticles = 55;
+    const particles = Array.from({ length: numParticles }, () => ({
+      x: rng() * W,
+      y: rng() * H,
+      vx: (rng() - 0.5) * 0.4,
+      vy: (rng() - 0.5) * 0.4,
+      r: rng() * 2 + 1,
+      opacity: rng() * 0.6 + 0.3,
+    }));
 
-useEffect(() => {
-  if (userData) {
-      console.log("User ID:", userData._id);
-      console.log("userdata");
-      console.log(userData);
-      console.log("calling frineds function");
-      getFriendsDetails(userData._id);
+    let animId;
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
 
-  }
-}, [userData]);
+      // Background
+      ctx.fillStyle = pal.bg;
+      ctx.fillRect(0, 0, W, H);
 
+      // Subtle overlay gradient
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, pal.primary + "33");
+      grad.addColorStop(1, pal.secondary + "22");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
 
+      // Move particles
+      particles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = W;
+        if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H;
+        if (p.y > H) p.y = 0;
+      });
 
+      // Draw lines between close particles
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 110) {
+            const alpha = (1 - dist / 110) * 0.35;
+            ctx.beginPath();
+            ctx.strokeStyle = pal.secondary + Math.round(alpha * 255).toString(16).padStart(2, "0");
+            ctx.lineWidth = 0.8;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
 
-const editProfile=()=>{
-    navigate("/edit");
-}
+      // Draw particles
+      particles.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = pal.secondary;
+        ctx.globalAlpha = p.opacity;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
 
-const goToPosts=()=>{
-  navigate("/newposts");
-}
+      // Accent glow orbs (fixed, seeded)
+      const orbs = [
+        { x: W * 0.15, y: H * 0.5, color: pal.primary },
+        { x: W * 0.75, y: H * 0.4, color: pal.accent },
+        { x: W * 0.5, y: H * 0.3, color: pal.secondary },
+      ];
+      orbs.forEach(({ x, y, color }) => {
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, 80);
+        glow.addColorStop(0, color + "44");
+        glow.addColorStop(1, "transparent");
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, W, H);
+      });
 
-const goToHome = () => {
-  navigate("/home"); // Replace "/home" with your actual home page route
-};
+      animId = requestAnimationFrame(draw);
+    };
 
-
-const convertToDateOfBirth = (dateString) => {
-  const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-
-
-
-
-if (!userData) {
-  return <Quote />;
-  // return <LoadingPage />;
-}
-
-
-
-
-
-
-
+    draw();
+    return () => cancelAnimationFrame(animId);
+  }, [seed]);
 
   return (
+    <canvas
+      ref={canvasRef}
+      width={1100}
+      height={200}
+      className="np-cover-canvas"
+    />
+  );
+};
 
-    
-    
-    <>
-    
-    
-
-    
-    <button className="modern-back-button" onClick={goToHome}>
-        <span className="arrow">
-          
-        <FiLogOut size={25}   style={{ transform: 'scaleX(-1)' }}/>
-          </span> 
-      </button>
-      
-
-
-
-
-<div className="profile-container">
-
-      <div className="profile-header">
-        <span>Username:{userData?.username}</span>
-        <span>University name: {userData?.collegeName}</span>
-      </div>
-
-      <div className="profile-body">
-        <div className="left-section">
-          {/* <div className="profile-photo">Profile Photo</div> */}
-          <div className="profile-photo">
-            <img src={userData?.profilePic} alt="profilepic" />
-          </div>
-          
-          <div className="my-profile-buttons">
-            <button className="edit-profile" onClick={editProfile}>Edit Profile</button>
-            <button className="view-my-posts" onClick={goToPosts}>View Posts</button>
-          </div>
-
-          {/* <div className="actions">
-            <button className="follow-btn">Follow</button>
-            <button className="chat-btn">Chat</button>
-          </div> */}
-          {/* <div className="connection-info">
-            <p>Connection</p>
-            <p>You have a connection with username</p>
-          </div>
-          <div className="mutual-friends">
-          <p>Mutual Friends</p>
-            <p>You have 19 common friends with username</p>
-          </div> */}
-          <div className="contact-info">
-            <h4>Contact info:</h4>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>Email: {userData?.email}</td>
-                    </tr>
-                    <tr>
-                        <td>Mobile Number: {userData?.mobileNumber}</td>
-                    </tr>
-                    <tr>
-                        <td>Website: {userData?.website}</td>
-                    </tr>
-                </tbody>
-            </table>
-           
-          </div>
-          {/* <table>
-            <tbody>
-              <tr>
-                <td><div className="friends">
-                    <p>Friends:</p>
-                  </td>
-              </tr>
-              <tr>
-              
-                <td>
-                <div className="friend-list">
-            {friends.map((friend) => (
-              <div key={friend._id} className="friend-item">
-                <img
-                  src={friend.profilePic}
-                  alt={`${friend.username}'s profile`}
-                  className="friend-profile-pic"
-                />
-                <p className="friend-username">{friend.username}</p>
-              </div>
-            ))}
-          </div>
-                </td>
-
-              </tr>
-
-            </tbody>
-          
-          
-        </div>
-          </table> */}
-
-<table>
-  <tbody>
-    <tr>
-      <td>
-        <div className="friends">
-          <p>Friends:</p>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div className="friend-list">
-          {friends.map((friend) => (
-            <div key={friend._id} className="friend-item">
-              <img
-                src={friend?.profilePic}
-                alt={`${friend?.username}'s profile`}
-                className="friend-profile-pic"
-              />
-              <p className="friend-username">{friend?.username}</p>
-            </div>
-          ))}
-        </div>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-          
-        </div>
-
-        <div className="center-section">
-          <h3>Information</h3>
-          <div className="info-table">
-            <h4>Account Info</h4>
-            <table>
-              <tbody>
-                <tr>
-                  <td>Full Name: {userData?.fullname}</td>
-                </tr>
-                <tr>
-                  <td>Member Since:{userData?.createdAt?.split('T')[0]}</td>
-                </tr>
-                <tr>
-                  <td>Last Updated:{userData?.updatedAt?.split('T')[0]}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <h4>Basic Info</h4>
-            <table>
-              <tbody>
-                <tr>
-                  <td>School: {userData?.school}</td>
-                </tr>
-                <tr>
-                  <td>Status: {userData?.status}</td>
-                </tr>
-                <tr>
-                  <td>Gender:{userData?.gender || '-'}</td>
-                </tr>
-                <tr>
-                  <td>Residence: {userData?.residence}</td>
-                </tr>
-                <tr>
-                  <td>Birthday:{userData?.dateOfBirth?.split('T')[0]}</td>
-                </tr>
-                  <tr>
-                  <td>Home Town:{userData?.hometown}</td>
-                </tr>
-                <tr>
-                  <td>High School: {userData?.highschool}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <h4>Personal Info</h4>
-            <table>
-              <tbody>
-                <tr>
-                  <td>Looking for: {userData?.lookingfor}</td>
-                </tr>
-                <tr>
-                  <td>Interested In: {userData?.interestedIn}</td>
-                </tr>
-                <tr>
-                  <td>Relationship Status: {userData?.relationshipStatus}</td>
-                </tr>
-                {/* <tr>
-                  <td>Best Friend: {userData?.bestFriend?.username}</td>
-                  
-                </tr> */}
-
-
-                {/* <tr>
-                  <td>Best Friends:</td>
-                  <td>
-                    {userData?.bestFriend && userData.bestFriend.length > 0 ? (
-                      userData.bestFriend.map((friend,index) => <span key={friend._id}>{friend.username}, </span>)
-                    ) : (
-                      <span>No best friends selected</span>
-                    )}
-                  </td>
-                </tr> */}
-
-<tr>
-  <td>Best Friends:
-  {/* <td> */}
-    {userData?.bestFriend && userData.bestFriend?.length > 0 ? (
-      userData.bestFriend.map((friend, index) => (
-        <span key={friend._id}>
-          {friend.username}
-          {index !== userData.bestFriend?.length - 1 && ", "}
-        </span>
-      ))
-    ) : (
-      <span>No best friends selected</span>
-    )}
-  </td>
-</tr>
-
-
-                <tr>
-                  <td>College Name: {userData?.collegeName}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <h4>Interest</h4>
-            <table>
-              <tbody>
-                <tr>
-                  <td>Interests: {userData?.interests}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Sports: {userData?.favoriteSport}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Game: {userData?.favoriteGame}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Music:{userData?.favoriteMusic}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Movie:{userData?.favoriteMovie}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Anime: {userData?.favoriteAnime}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Actor:{userData?.favoriteActor}</td>
-                </tr>
-                <tr>
-                  <td>About me (Bio): {userData?.bio}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="right-section">
-          {/* <p>Leave this space</p> */}
-        </div>
+const InfoRow = ({ icon, label, value }) => {
+  if (!value) return null;
+  return (
+    <div className="np-info-row">
+      <span className="np-info-icon">{icon}</span>
+      <div className="np-info-text">
+        <span className="np-info-label">{label}</span>
+        <span className="np-info-value">{value}</span>
       </div>
     </div>
+  );
+};
 
-    </>
+const InterestTag = ({ emoji, label, value }) => {
+  if (!value) return null;
+  return (
+    <div className="np-interest-tag">
+      <span className="np-interest-emoji">{emoji}</span>
+      <div>
+        <div className="np-interest-label">{label}</div>
+        <div className="np-interest-value">{value}</div>
+      </div>
+    </div>
+  );
+};
 
-  
-  
+const Profile = () => {
+  const [userData, setUserData] = useState(null);
+  const [friends, setFriends] = useState([]);
+  const [error, setError] = useState(null);
+
+  // New state for inline posts grid
+  const [activeTab, setActiveTab] = useState("posts");
+  const [posts, setPosts] = useState([]);
+  const [likedPosts, setLikedPosts] = useState([]);
+  const [savedPosts, setSavedPosts] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [showTextPosts, setShowTextPosts] = useState(false);
+
+  const { token, authuser } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const fetchUserData = async () => {
+    try {
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+      const response = await api.get("/profile/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      setUserData(response.data);
+    } catch (error) {
+      console.error("Failed to fetch user data:", error.message);
+      setError("Error fetching user data. Please try again later.");
+    }
+  };
+
+  const getFriendsDetails = async (userId) => {
+    try {
+      const response = await api.get(`/profile/getfriends/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setFriends(response.data);
+    } catch (error) {
+      console.error("Error fetching friends:", error.message);
+    }
+  };
+
+  // Fetch posts data
+  const fetchPostsData = async (userId) => {
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      const [postsRes, likedRes, savedRes] = await Promise.all([
+        api.get(`/profile/userPosts/${userId}`, { headers }),
+        api.get(`/profile/likedPosts/${userId}`, { headers }),
+        api.get(`/profile/savedPosts/${userId}`, { headers })
+      ]);
+      setPosts(postsRes.data.posts || []);
+      setLikedPosts(likedRes.data || []);
+      setSavedPosts(savedRes.data || []);
+    } catch (error) {
+      console.error("Error fetching posts data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    if (userData) {
+      getFriendsDetails(userData._id);
+      fetchPostsData(userData._id);
+    }
+  }, [userData]);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  };
+
+  const renderGridData = () => {
+    let data = [];
+    if (activeTab === "posts") data = posts;
+    else if (activeTab === "liked") data = likedPosts;
+    else if (activeTab === "saved") data = savedPosts.map(sp => sp.postId).filter(Boolean);
+    if (!showTextPosts) data = data.filter(p => p.postType !== "text");
+    return data;
+  };
+
+  if (error) {
+    return (
+      <div className="np-error-screen">
+        <div className="np-error-card">
+          <div className="np-error-icon">⚠️</div>
+          <h2>Something went wrong</h2>
+          <p>{error}</p>
+          <button onClick={fetchUserData} className="np-btn-primary">Try Again</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div className="np-loading-screen">
+        <div className="np-skeleton-wrapper">
+          <div className="np-skeleton-banner" />
+          <div className="np-skeleton-avatar" />
+          <div className="np-skeleton-line wide" />
+          <div className="np-skeleton-line medium" />
+          <div className="np-skeleton-stats">
+            <div className="np-skeleton-stat" />
+            <div className="np-skeleton-stat" />
+            <div className="np-skeleton-stat" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const gridData = renderGridData();
+
+  return (
+    <div className="np-page">
+      {/* Back Button */}
+      <button className="np-back-btn" onClick={() => navigate("/home")}>
+        <FiLogOut size={18} style={{ transform: "scaleX(-1)" }} />
+        <span>Home</span>
+      </button>
+
+      <div className="np-profile-wrapper">
+        {/* ── Cover + Avatar Header ── */}
+        <div className="np-cover-section">
+          <ConstellationBanner seed={userData.username || "friendsbook"} />
+          <div className="np-avatar-area">
+            <div className="np-avatar-container">
+              <img
+                src={userData.profilePic || "/images/squarepfp.png"}
+                alt={userData.username}
+                className="np-avatar-img"
+                onError={(e) => { e.target.src = "/images/squarepfp.png"; }}
+              />
+            </div>
+            <div className="np-profile-identity">
+              <h1 className="np-username">@{userData.username}</h1>
+              <p className="np-fullname">{userData.fullname}</p>
+              {userData.bio && <p className="np-bio">"{userData.bio}"</p>}
+              {userData.collegeName && (
+                <p className="np-college">🎓 {userData.collegeName}</p>
+              )}
+            </div>
+            <div className="np-header-actions">
+              <button className="np-btn-primary" onClick={() => navigate("/edit")}>
+                <FiEdit2 size={14} /> Edit Profile
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Stats Bar ── */}
+        <div className="np-stats-bar">
+          <div className="np-stat-item">
+            <span className="np-stat-number">{userData.postsCount || 0}</span>
+            <span className="np-stat-label">Posts</span>
+          </div>
+          <div className="np-stat-divider" />
+          <div className="np-stat-item">
+            <span className="np-stat-number">{userData.followers?.length || 0}</span>
+            <span className="np-stat-label">Followers</span>
+          </div>
+          <div className="np-stat-divider" />
+          <div className="np-stat-item">
+            <span className="np-stat-number">{userData.following?.length || 0}</span>
+            <span className="np-stat-label">Following</span>
+          </div>
+          <div className="np-stat-divider" />
+          <div className="np-stat-item">
+            <span className="np-stat-number">{userData.streak?.count || 0}</span>
+            <span className="np-stat-label">🔥 Streak</span>
+          </div>
+        </div>
+
+        {/* ── Main Content Grid ── */}
+        <div className="np-content-grid">
+          {/* Left Column */}
+          <div className="np-left-col">
+            {/* Contact Info */}
+            <div className="np-card">
+              <h3 className="np-card-title">Contact Info</h3>
+              <InfoRow icon={<FiMail />} label="Email" value={userData.email} />
+              <InfoRow icon={<FiPhone />} label="Mobile" value={userData.mobileNumber} />
+              <InfoRow icon={<FiGlobe />} label="Website" value={userData.website} />
+            </div>
+
+            {/* Basic Info */}
+            <div className="np-card">
+              <h3 className="np-card-title">Basic Info</h3>
+              <InfoRow icon={<FiBook />} label="School" value={userData.school} />
+              <InfoRow icon={<FiHome />} label="Hometown" value={userData.hometown} />
+              <InfoRow icon={<FiMapPin />} label="Residence" value={userData.residence} />
+              <InfoRow icon={<FiCalendar />} label="Birthday" value={formatDate(userData.dateOfBirth)} />
+              <InfoRow icon="🎓" label="High School" value={userData.highschool} />
+              <InfoRow icon="💼" label="Status" value={userData.status} />
+              <InfoRow icon="⚧" label="Gender" value={userData.gender} />
+            </div>
+
+            {/* Personal Info */}
+            <div className="np-card">
+              <h3 className="np-card-title">Personal Info</h3>
+              <InfoRow icon={<FiHeart />} label="Relationship" value={userData.relationshipStatus} />
+              <InfoRow icon="👀" label="Looking For" value={userData.lookingfor} />
+              <InfoRow icon="✨" label="Interested In" value={userData.interestedIn} />
+              {userData.bestFriend && userData.bestFriend.length > 0 && (
+                <div className="np-info-row">
+                  <span className="np-info-icon">⭐</span>
+                  <div className="np-info-text">
+                    <span className="np-info-label">Best Friends</span>
+                    <span className="np-info-value">
+                      {userData.bestFriend.map(f => f.username).join(", ")}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="np-right-col">
+            {/* Friends Grid */}
+            {friends.length > 0 && (
+              <div className="np-card">
+                <h3 className="np-card-title">Friends</h3>
+                <div className="np-friends-grid">
+                  {friends.map((friend) => (
+                    <div key={friend._id} className="np-friend-card">
+                      <img
+                        src={friend.profilePic || "/images/squarepfp.png"}
+                        alt={friend.username}
+                        className="np-friend-pic"
+                        onError={(e) => { e.target.src = "/images/squarepfp.png"; }}
+                      />
+                      <p className="np-friend-name">{friend.username}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Interests */}
+            <div className="np-card">
+              <h3 className="np-card-title">Interests & Favorites</h3>
+              <div className="np-interests-grid">
+                <InterestTag emoji="🎮" label="Game" value={userData.favoriteGame} />
+                <InterestTag emoji="🎵" label="Music" value={userData.favoriteMusic} />
+                <InterestTag emoji="🎬" label="Movie" value={userData.favoriteMovie} />
+                <InterestTag emoji="⚽" label="Sport" value={userData.favoriteSport} />
+                <InterestTag emoji="📺" label="Anime" value={userData.favoriteAnime} />
+                <InterestTag emoji="🌟" label="Actor" value={userData.favoriteActor} />
+              </div>
+              {userData.interests && (
+                <div className="np-interests-text">
+                  <span className="np-info-label">Interests</span>
+                  <p className="np-interests-desc">{userData.interests}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Account Info */}
+            <div className="np-card np-account-card">
+              <h3 className="np-card-title">Account Info</h3>
+              <div className="np-account-row">
+                <span className="np-account-label">Member Since</span>
+                <span className="np-account-value">{userData.createdAt?.split("T")[0]}</span>
+              </div>
+              <div className="np-account-row">
+                <span className="np-account-label">Last Updated</span>
+                <span className="np-account-value">{userData.updatedAt?.split("T")[0]}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Posts Tab Section ── */}
+        <div className="np-tabs-container">
+          <div className="np-tabs-row">
+            <div className="np-tabs">
+              <button className={`np-tab ${activeTab === 'posts' ? 'active' : ''}`} onClick={() => setActiveTab('posts')}>
+                Posts
+              </button>
+              <button className={`np-tab ${activeTab === 'liked' ? 'active' : ''}`} onClick={() => setActiveTab('liked')}>
+                Liked
+              </button>
+              <button className={`np-tab ${activeTab === 'saved' ? 'active' : ''}`} onClick={() => setActiveTab('saved')}>
+                Saved
+              </button>
+            </div>
+            <button
+              className={`np-text-toggle ${showTextPosts ? 'active' : ''}`}
+              onClick={() => setShowTextPosts(prev => !prev)}
+              title={showTextPosts ? "Hide text posts" : "Show text posts"}
+            >
+              {showTextPosts ? "Hide text posts" : "Show text posts"}
+            </button>
+          </div>
+
+          <div className="np-post-grid">
+            {gridData.map((post, idx) => (
+              <div
+                key={post._id}
+                className="np-post-cell"
+                onClick={() => setSelectedPost(post)}
+              >
+                {post.postType === "image" && post.content?.mediaUrl && (
+                  <img src={post.content.mediaUrl} alt="Post" className="np-post-media" />
+                )}
+                {post.postType === "video" && post.content?.mediaUrl && (
+                  <>
+                    <video className="np-post-media" muted>
+                      <source src={post.content.mediaUrl} type="video/mp4" />
+                    </video>
+                    <div className="np-post-video-badge">▶</div>
+                  </>
+                )}
+                {post.postType === "text" && (
+                  <div className={`np-post-text-preview np-text-palette-${idx % 5}`}>
+                    <p className="np-text-body">{post.caption?.length > 90 ? post.caption.slice(0, 90) + "…" : post.caption}</p>
+                  </div>
+                )}
+
+              </div>
+            ))}
+            {gridData.length === 0 && (
+              <div className="np-no-posts">
+                <div className="np-no-posts-icon">📭</div>
+                <p>{!showTextPosts ? "No media posts yet." : "No posts to show here yet."}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Post Viewer Modal ── */}
+      {selectedPost && (
+        <div className="np-modal-backdrop" onClick={() => setSelectedPost(null)}>
+          <div className="np-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="np-modal-close" onClick={() => setSelectedPost(null)}>✖</button>
+            
+            <div className="np-modal-header">
+              <img
+                src={selectedPost.user?.profilePic || userData.profilePic || "/images/squarepfp.png"}
+                alt="Profile"
+                className="np-modal-avatar"
+                onError={(e) => { e.target.src = "/images/squarepfp.png"; }}
+              />
+              <strong className="np-modal-username">
+                {selectedPost.user?.username || userData.username}
+              </strong>
+            </div>
+
+            {selectedPost.caption && (
+              <p className="np-modal-caption">{selectedPost.caption}</p>
+            )}
+
+            <div className="np-modal-media-container">
+              {selectedPost.postType === "image" && selectedPost.content?.mediaUrl && (
+                <img src={selectedPost.content.mediaUrl} alt="Post content" className="np-modal-img" />
+              )}
+              {selectedPost.postType === "video" && selectedPost.content?.mediaUrl && (
+                <video controls className="np-modal-video">
+                  <source src={selectedPost.content.mediaUrl} type="video/mp4" />
+                </video>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

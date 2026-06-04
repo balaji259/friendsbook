@@ -1,19 +1,27 @@
 const express = require('express');
 const router = express.Router();
-
-const User = require('../models/users'); // Adjust the path as needed
+const User = require('../models/users');
+const { evaluateStreak } = require('../utils/streakUtils');
 
 // Function to get the top 10 users by streak count
 const getTopStreakUsers = async (req, res) => {
   try {
-    console.log("called");
-    const topStreakUsers = await User.find()
-      .sort({ 'streak.count': -1 }) // Sort by streak count in descending order
-      .limit(15) // Limit to top 10 users
-      .select('profilePic username streak.count'); // Select only the necessary fields
-// 
-    // console.log("top streak users");
-    // console.log(topStreakUsers);
+    const allUsers = await User.find().select('profilePic username streak');
+    
+    // Evaluate streaks for everyone so broken ones drop to 0
+    const evaluatedUsers = await Promise.all(allUsers.map(u => evaluateStreak(u)));
+    
+    // Sort descending and grab top 10
+    const topStreakUsers = evaluatedUsers
+      .sort((a, b) => (b.streak?.count || 0) - (a.streak?.count || 0))
+      .slice(0, 10)
+      .map(u => ({
+        _id: u._id,
+        profilePic: u.profilePic,
+        username: u.username,
+        streak: { count: u.streak.count }
+      }));
+
     res.status(200).json(topStreakUsers);
   } catch (error) {
     console.error(error);

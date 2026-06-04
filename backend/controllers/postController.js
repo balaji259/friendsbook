@@ -8,7 +8,6 @@ const authMiddleware = require('../middleware/auth');
 const SavedPost = require('../models/savedPost');
 const User = require("../models/users");
 const multiparty = require("multiparty");
-const { checkStreakOnLoad, updateStreakOnPost } = require("../routes/streak");
 
 
 const getISTDate = () => {
@@ -90,40 +89,43 @@ const createPost = async(req,res) => {
                 const post = new Post({ user: userId, postType, caption, content: { mediaUrl } });
                 await post.save();
     
-                // Update user's post count & streak in a single query
+                // --- Streak Logic Simplified ---
+                const user = await User.findById(userId);
+                if (!user) return res.status(404).json({ error: 'User not found' });
+
                 const currentDate = new Date();
                 currentDate.setHours(0, 0, 0, 0);
-    
+
+                let newCount = user.streak?.count || 0;
+                
+                if (user.streak?.lastPostTime) {
+                    const lastPostDate = new Date(user.streak.lastPostTime);
+                    lastPostDate.setHours(0, 0, 0, 0);
+                    
+                    const diffTime = Math.abs(currentDate - lastPostDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays === 1) {
+                        newCount += 1; // Consecutive day
+                    } else if (diffDays > 1) {
+                        newCount = 1; // Streak broke, start over
+                    }
+                    // if diffDays === 0, they already posted today, count remains the same
+                } else {
+                    newCount = 1; // First post ever
+                }
+
                 const updateUser = await User.findByIdAndUpdate(
-        userId,
-        [
-            {
-                $set: {
-                    "streak.lastPostTime": currentDate,
-                    "streak.count": {
-                        $cond: {
-                            if: { $eq: ["$streak.lastPostTime", currentDate] },
-                            then: "$streak.count",
-                            else: {
-                                $cond: {
-                                    if: {
-                                        $eq: [
-                                            { $dateDiff: { startDate: "$streak.lastPostTime", endDate: currentDate, unit: "day" } },
-                                            1,
-                                        ],
-                                    },
-                                    then: { $add: ["$streak.count", 1] },
-                                    else: 1,
-                                },
-                            },
+                    userId,
+                    {
+                        $set: {
+                            "streak.count": newCount,
+                            "streak.lastPostTime": currentDate
                         },
+                        $inc: { postsCount: 1 }
                     },
-                    postsCount: { $add: ["$postsCount", 1] } // <-- replaces $inc
-                },
-            }
-        ],
-        { new: true }
-    );
+                    { new: true }
+                );
     
     
                 if (!updateUser) return res.status(404).json({ error: 'User not found' });

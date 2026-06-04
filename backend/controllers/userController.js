@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/users');
 const authMiddleware = require("../middleware/auth");
-const { checkStreakOnLoad, updateStreakOnPost } =require("../routes/streak");
+const { evaluateStreak } = require('../utils/streakUtils');
 
 
 const getUserDetails = async (req,res) =>{

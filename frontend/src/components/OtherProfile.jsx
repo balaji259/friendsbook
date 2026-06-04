@@ -1,540 +1,460 @@
-import React from "react";
-import {useState,useEffect,useRef} from "react";
-import {useNavigate} from "react-router-dom";
-import { useParams } from 'react-router-dom';
-import axios from "axios";
-import "./OtherProfile.css"; // Assuming CSS styles are in this file
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "./NewProfile.css"; // Shared profile styles
 import { useSocket } from "./useSocket";
-import { FiLogOut } from "react-icons/fi";
-import Quote from "./Quote";
+import { FiLogOut, FiMail, FiPhone, FiGlobe, FiMapPin, FiCalendar, FiHeart, FiBook, FiHome, FiMessageSquare } from "react-icons/fi";
+// BUG FIX #5: import the project's api instance instead of raw axios
+import api from "../api/api";
 import { useChatStore } from "./useChatStore";
 
-const Profile = () => {
-
-    // const { userId } = useParams(); // Get userId from the URL
-  
-    const [userData, setUserData] = useState(null);
-    const [currentUserId,setCurrentUserId]=useState();
-    const [userPosts, setUserPosts] = useState([]);
-    const [savedPosts, setSavedPosts] = useState([]);
-    const [likedPosts,setLikedPosts]=useState([]);
-    const [selectedPost, setSelectedPost] = useState(null);
-    const [activeTab, setActiveTab] = useState();
-    const [friends,setFriends]=useState([]);
-    const [connectionStatus, setConnectionStatus] = useState(null);
-    const [mutualFriendsCount, setMutualFriendsCount] = useState(0);
-    const [isFollowing, setIsFollowing] = useState(false);
-    const [loading, setLoading] = useState(false); // For button loading state
-    const {onlineUsers} =useSocket();   
-    const {profileId, setProfileId, chatUserId, setChatUserId}=useChatStore();
-    // const userId=profileId;
-    
-    
-  
-    const renderurl="https://socialmedia-backend-2njs.onrender.com";
-
-    const navigate=useNavigate();
-    const backendBaseUrl="http://localhost:7000";
-
-    const token = localStorage.getItem("token");
-
-    const fetchuserId= async ()=>{
-        try{
-          const token = localStorage.getItem("token");
-          if(!token){
-            alert("No token bro!")
-            return;
-          }
-          
-          // Decode the JWT token to get the userId
-          const payload = parseJwt(token);
-          if (!payload || !payload.userId) {
-              alert("User not authenticated. Please log in again.");
-              return;
-          }
-      
-            setCurrentUserId(payload.userId);
-            console.log("payload.userId");
-            console.log(payload.userId);
-            console.log("currentuserId");
-            console.log(currentUserId);
-        }
-        catch(e){
-          console.log(e);
-        }
-      }
-
-      const parseJwt = (token) => {
-        try {
-            if(!token)
-            {
-              alert("error here");
-              return;
-
-            }
-            const base64Url = token.split(".")[1];
-            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-            return JSON.parse(window.atob(base64));
-        } catch (error) {
-            console.error("Invalid token format");
-            return null;
-        }
-    };
-
-    useEffect(()=>{
-      console.log("target user uid",profileId);
-      
-      fetchuserId();
-      },[currentUserId])
-
-useEffect(()=>{
-  console.log("come on!");
-  console.log(profileId);
-},[profileId]);
-
-      const handleChat = (profileId) => {
-
-        if(profileId){
-          
-          setChatUserId(profileId);
-          navigate("/chats");
-        }
-    
-      };
-
-
-      // useEffect(()=>{
-      //   if(chatUserId){
-      //     navigate('/chats');
-      //   }
-      // },[chatUserId]);
-
-      useEffect(() => {
-        // Fetch user data by userId
-        if(profileId && profileId !== undefined){
-          console.log("useriod from fetching-",profileId);
-          axios.get(`/user/viewProfile/${profileId}`)
-              .then((response) => {
-                console.log("userdata");
-                console.log(response.data);
-                  setUserData(response.data);
-              })
-              .catch((error) => {
-                  console.error('Error fetching user data:', error);
-              });
-        }
- }, [profileId]);
-
-
- const checkConnection = async () => {
-    try {
-      if(!currentUserId || !profileId){
-        alert("error here");
-        return;
-      }
-      const response = await axios.get(`/profile/check-connection/${currentUserId}/${profileId}`);
-      setConnectionStatus(response.data);
-    } catch (error) {
-      console.error('Error checking connection:', error);
-    }
-  };
-
-
- 
-
-const fetchMutualFriends = async () => {
-  try {
-    if (profileId && currentUserId) {
-      const response = await axios.get(`/profile/mutual-friends/${currentUserId}/${profileId}`);
-      setMutualFriendsCount(response.data.mutualFriendsCount);
-    }
-  } catch (error) {
-    console.error("Error fetching mutual friends:", error);
-  }
-};
-
-
-async function getFriendsDetails(profileId) {
-    try {
-      console.log("before");
-      const response = await fetch(`http://localhost:7000/profile/getfriends/${profileId}`);
-      console.log("after");
-      console.log(response);
-      if (!response.ok) {
-        throw new Error('Failed to fetch friends');
-      }
-  
-      const friends = await response.json(); // Parse the JSON response
-      console.log("friends");
-      console.log(friends);
-      setFriends(friends);
-      // return friends; // Return the friends data
-    } catch (error) {
-      console.error('Error fetching friends:', error.message);
-      return []; // Return an empty array in case of an error
-    }
-  }
-
-
- useEffect(() => {
-   // Fetch connection status
- 
-   if(profileId && currentUserId)
-    {
-
-      checkConnection();
-      fetchMutualFriends();
-      getFriendsDetails(profileId);
-      fetchFollowStatus();
-    }
- }, [currentUserId, profileId]);
-
-
-   // Fetch initial follow status
-   const fetchFollowStatus = async () => {
-    if(profileId && currentUserId){
-
-      try {
-      const response = await axios.get(
-        `/profile/isFollowing/${profileId}/${currentUserId}`);
-        
-        console.log("follow status");
-        console.log(response.data.isFollowing);
-        setIsFollowing(response.data.isFollowing); // Assuming API returns { isFollowing: true/false }
-      } catch (error) {
-        console.error("Error fetching follow status:", error);
-      }
-    }
-    };
-    
-    // Toggle Follow/Unfollow
-    const handleFollowToggle = async () => {
-        setLoading(true); // Show loading indicator on button
-        try {
-          if (isFollowing) {
-            // Unfollow API call
-            console.log('calling unfollow route');
-            await axios.post(
-              `/profile/unfollow/${profileId}/${currentUserId}`);
-          } else {
-            // Follow API call
-            console.log("calling follow route ! ");
-            await axios.post(`/profile/follow/${profileId}/${currentUserId}`);
-            console.log("success");
-
-
-          }
-          setIsFollowing(!isFollowing); // Toggle follow status locally
-        } catch (error) {
-          console.error("Error toggling follow status:", error);
-        } finally {
-          setLoading(false); // Hide loading indicator
-          checkConnection();
-          fetchMutualFriends();
-          getFriendsDetails(profileId);
-        }
-      };
-
-      const goToHome = () => {
-        setProfileId(null);
-        navigate("/home"); // Replace "/home" with your actual home page route
-      };
-
-      const handleNavigationToPosts = (profileId)=>{
-        navigate('/viewposts');
-      }
-     
-
-    if (!userData) return <Quote />;
-
+const InfoRow = ({ icon, label, value }) => {
+  if (!value) return null;
   return (
-    <>
-
-  <button className="modern-back-button" onClick={goToHome}>
-        <span className="arrow">
-          
-        <FiLogOut size={25}   style={{ transform: 'scaleX(-1)' }}/>
-          </span> 
-      </button>
-      
-
-    <div className="profile-container">
-      <div className="profile-header">
-        <span>Name of the User:{userData?.username}</span>
-        <span>University name: {userData?.collegeName}</span>
-      </div>
-
-      <div className="profile-body">
-        <div className="left-section">
-          {/* <div className="profile-photo">Profile Photo</div> */}
-
-        {/* //from    */}
-          {/* <div className="profile-photo"> */}
-            {/* <img src={userData?.profilePic} alt="profilepic" /> */}
-              {/* <img
-                src={
-                  userData?.profilePic === "/images/default_profile.jpeg"
-                    ? "/images/default_profile.jpeg"
-                    : `${userData?.profilePic}`
-                }
-                alt="User Profile Picture" */}
-                {/* // className="cursor-pointer w-full h-48 object-cover rounded-md"
-                // style={profilePicStyle}
-               
-              /> */}
-
-              {/* Online indicator */}
-              {/* {onlineUsers && Array.isArray(onlineUsers) && onlineUsers.includes(userId) && (
-                <span className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-zinc-900" />
-              )} */}
-            {/* upto here */}
-          {/* </div> */}
-
-          <div className="profile-photo relative">
-  {/* Online indicator */}
-  {onlineUsers && Array.isArray(onlineUsers) && profileId && onlineUsers.includes(profileId) && (
-    <div className="absolute top-0 left-0 flex items-center gap-1 bg-black bg-opacity-70 px-2 py-1 rounded-br-md">
-      <span className="w-3 h-3 bg-green-500 rounded-full" />
-      <span className="text-white text-sm">Online</span>
-    </div>
-  )}
-
-  {/* Profile picture */}
-  <img
-    src={
-      userData?.profilePic === "/images/squarepfp.png"
-        ? "/images/squarepfp.png"
-        : `${userData?.profilePic}`
-    }
-    alt="User Profile Picture"
-   
-  />
-</div>
-
-
-
-            
-          {/* <button className="edit-profile" onClick={editProfile}>Edit Profile</button> */}
-          <div className="view-div">
-            <button className="view-posts" onClick={()=>{handleNavigationToPosts(profileId)}}>View {userData?.username} Posts</button>
-          </div>
-          
-          <div className="actions">
-            {/* <button className="follow-btn">Follow</button> */}
-
-            <button
-                onClick={handleFollowToggle}
-                disabled={loading} // Disable button while loading
-                className={`follow-button ${isFollowing ? "unfollow" : "follow"}`} // Add dynamic classes for styling
-                >
-                {loading ? "Processing..." : isFollowing ? "Unfollow" : "Follow"}
-            </button>
-
-            <button className="chat-btn" onClick={()=>{handleChat(profileId)}}>Chat</button>
-          </div>
-          <div className="connection-info">
-            <p>Connection</p>
-            {connectionStatus ? (
-                connectionStatus.connection ? (
-                <p>You have a connection with this user</p>
-                ) : (
-                <p>You do not have a connection with this user</p>
-                )
-            ) : (
-                <p>Loading connection status...</p>
-            )}
-          </div>
-          <div className="mutual-friends">
-            <p>Mutual Friends</p>
-            <p>You have {mutualFriendsCount} common friends with {userData?.username}</p>
-          </div>
-          <div className="contact-info">
-            <h4>Contact info:</h4>
-            <table>
-                <tbody>
-                    <tr>
-                        <td>Email: {userData?.email}</td>
-                    </tr>
-                    <tr>
-                        <td>Mobile Number: {userData?.mobileNumber}</td>
-                    </tr>
-                    <tr>
-                        <td>Website: {userData?.website}</td>
-                    </tr>
-                </tbody>
-            </table>
-           
-          </div>
-          {/* <table>
-            <tbody>
-              <tr>
-                <td><div className="friends">
-                    <p>Friends:</p>
-                  </td>
-              </tr>
-              <tr>
-
-                <td>
-                <div className="friend-list">
-            {friends.map((friend) => (
-              <div key={friend._id} className="friend-item">
-                <img
-                  src={friend.profilePic}
-                  alt={`${friend.username}'s profile`}
-                  className="friend-profile-pic"
-                />
-                <p className="friend-username">{friend.username}</p>
-              </div>
-            ))}
-          </div>
-                </td>
-
-              </tr>
-
-            </tbody>
-          
-          
-        </div>
-          </table> */}
-
-<table>
-  <tbody>
-    <tr>
-      <td>
-        <div className="friends">
-          <p>Friends:</p>
-        </div>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <div className="friend-list">
-          {friends.map((friend) => (
-            <div key={friend._id} className="friend-item">
-              <img
-                src={friend.profilePic}
-                alt={`${friend.username}'s profile`}
-                className="friend-profile-pic"
-              />
-              <p className="friend-username">{friend.username}</p>
-            </div>
-          ))}
-        </div>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-          
-        </div>
-
-        <div className="center-section">
-          <h3>Information</h3>
-          <div className="info-table">
-            <h4>Account Info</h4>
-            <table>
-              <tbody>
-                <tr>
-                  <td>Name: {userData?.fullname}</td>
-                </tr>
-                <tr>
-                  <td>Member Since:{userData?.createdAt?.split('T')[0]}</td>
-                </tr>
-                <tr>
-                  <td>Last Update:{userData?.updatedAt?.split('T')[0]}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <h4>Basic Info</h4>
-            <table>
-              <tbody>
-                <tr>
-                  <td>School: {userData?.school}</td>
-                </tr>
-                <tr>
-                  <td>Status: {userData?.status}</td>
-                </tr>
-                <tr>
-                  <td>Gender:{userData?.gender}</td>
-                </tr>
-                <tr>
-                  <td>Residence: {userData?.residence}</td>
-                </tr>
-                <tr>
-                  <td>Birthday:{userData?.dateOfBirth?.split('T')[0]}</td>
-                </tr>
-                <tr>
-                  <td>Home Town:{userData?.hometown}</td>
-                </tr>
-                <tr>
-                  <td>High School: {userData?.highschool}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <h4>Personal Info</h4>
-            <table>
-              <tbody>
-                <tr>
-                  <td>Looking for: {userData?.lookingfor}</td>
-                </tr>
-                <tr>
-                  <td>Interested In: {userData?.interestedIn}</td>
-                </tr>
-                <tr>
-                  <td>Relationship Status: {userData?.relationshipStatus}</td>
-                </tr>
-                <tr>
-                  <td>Best Friend: {userData?.bestFriend?.username}</td>
-                  {/* <td>Best Friend: {"later!"}</td> */}
-                </tr>
-                <tr>
-                  <td>College Name: {userData?.collegeName}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            <h4>Interest</h4>
-            <table>
-              <tbody>
-                <tr>
-                  <td>Interests: {userData?.interests}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Sports: {userData?.favoriteSport}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Game: {userData?.favoriteGame}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Music:{userData?.favoriteMusic}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Movie:{userData?.favoriteMovie}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Anime: {userData?.favoriteAnime}</td>
-                </tr>
-                <tr>
-                  <td>Favorite Actor:{userData?.favoriteActor}</td>
-                </tr>
-                <tr>
-                  <td>About me (Bio): {userData?.bio}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="right-section">
-          {/* <p>Leave this space</p> */}
-        </div>
+    <div className="np-info-row">
+      <span className="np-info-icon">{icon}</span>
+      <div className="np-info-text">
+        <span className="np-info-label">{label}</span>
+        <span className="np-info-value">{value}</span>
       </div>
     </div>
-
-    </>
   );
 };
 
-export default Profile;
+const InterestTag = ({ emoji, label, value }) => {
+  if (!value) return null;
+  return (
+    <div className="np-interest-tag">
+      <span className="np-interest-emoji">{emoji}</span>
+      <div>
+        <div className="np-interest-label">{label}</div>
+        <div className="np-interest-value">{value}</div>
+      </div>
+    </div>
+  );
+};
+
+const OtherProfile = () => {
+  const [userData, setUserData] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const [friends, setFriends] = useState([]);
+  const [connectionStatus, setConnectionStatus] = useState(null);
+  const [mutualFriendsCount, setMutualFriendsCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
+
+  // New state for inline posts grid
+  const [posts, setPosts] = useState([]);
+  const [selectedPost, setSelectedPost] = useState(null);
+
+  const { onlineUsers } = useSocket();
+  const { profileId, setProfileId, setChatUserId } = useChatStore();
+  const navigate = useNavigate();
+
+  // Parse JWT to get current user id
+  const parseJwt = (token) => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      return JSON.parse(window.atob(base64));
+    } catch {
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    const payload = parseJwt(token);
+    if (!payload?.userId) {
+      navigate("/login");
+      return;
+    }
+    setCurrentUserId(payload.userId);
+  }, []);
+
+  // Fetch target user profile
+  useEffect(() => {
+    if (!profileId) return;
+    // BUG FIX #5: use api instance instead of raw axios
+    api.get(`/user/viewProfile/${profileId}`)
+      .then((res) => setUserData(res.data))
+      .catch((err) => console.error("Error fetching user data:", err))
+      .finally(() => setPageLoading(false));
+  }, [profileId]);
+
+  // Fetch follow status, connection, mutual friends, friends list, posts
+  useEffect(() => {
+    if (!profileId || !currentUserId) return;
+    checkConnection();
+    fetchMutualFriends();
+    getFriendsDetails();
+    fetchFollowStatus();
+    fetchUserPosts();
+  }, [currentUserId, profileId]);
+
+  const checkConnection = async () => {
+    try {
+      // BUG FIX #5: use api instance
+      const res = await api.get(`/profile/check-connection/${currentUserId}/${profileId}`);
+      setConnectionStatus(res.data);
+    } catch (err) {
+      console.error("Error checking connection:", err);
+    }
+  };
+
+  const fetchMutualFriends = async () => {
+    try {
+      const res = await api.get(`/profile/mutual-friends/${currentUserId}/${profileId}`);
+      setMutualFriendsCount(res.data.mutualFriendsCount);
+    } catch (err) {
+      console.error("Error fetching mutual friends:", err);
+    }
+  };
+
+  const getFriendsDetails = async () => {
+    try {
+      // BUG FIX #4: was hardcoded fetch('http://localhost:7000/...') — now uses api
+      const res = await api.get(`/profile/getfriends/${profileId}`);
+      setFriends(res.data);
+    } catch (err) {
+      console.error("Error fetching friends:", err);
+    }
+  };
+
+  const fetchFollowStatus = async () => {
+    try {
+      const res = await api.get(`/profile/isFollowing/${profileId}/${currentUserId}`);
+      setIsFollowing(res.data.isFollowing);
+    } catch (err) {
+      console.error("Error fetching follow status:", err);
+    }
+  };
+
+  const fetchUserPosts = async () => {
+    try {
+      const res = await api.get(`/profile/userPosts/${profileId}`);
+      setPosts(res.data.posts || []);
+    } catch (error) {
+      console.error("Error fetching user posts:", error);
+    }
+  };
+
+  const handleFollowToggle = async () => {
+    if (!currentUserId || !profileId) return;
+    setLoading(true);
+    try {
+      if (isFollowing) {
+        await api.post(`/profile/unfollow/${profileId}/${currentUserId}`);
+        setIsFollowing(false);
+        setUserData((prev) => ({ ...prev, followers: prev.followers.filter((id) => id !== currentUserId) }));
+      } else {
+        await api.post(`/profile/follow/${profileId}/${currentUserId}`);
+        setIsFollowing(true);
+        setUserData((prev) => ({ ...prev, followers: [...prev.followers, currentUserId] }));
+      }
+    } catch (err) {
+      console.error("Error updating follow status:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startChat = () => {
+    setChatUserId(profileId);
+    navigate("/chat");
+  };
+
+  const goToHome = () => {
+    setProfileId(null);
+    navigate("/home");
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  };
+
+  const isOnline = onlineUsers && Array.isArray(onlineUsers) && profileId && onlineUsers.includes(profileId);
+
+  if (pageLoading || !userData) {
+    return (
+      <div className="np-loading-screen">
+        <div className="np-skeleton-wrapper">
+          <div className="np-skeleton-banner" />
+          <div className="np-skeleton-avatar" />
+          <div className="np-skeleton-line wide" />
+          <div className="np-skeleton-line medium" />
+          <div className="np-skeleton-stats">
+            <div className="np-skeleton-stat" />
+            <div className="np-skeleton-stat" />
+            <div className="np-skeleton-stat" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="np-page">
+      {/* Back Button */}
+      <button className="np-back-btn" onClick={goToHome}>
+        <FiLogOut size={18} style={{ transform: "scaleX(-1)" }} />
+        <span>Home</span>
+      </button>
+
+      <div className="np-profile-wrapper">
+        {/* ── Cover + Avatar Header ── */}
+        <div className="np-cover-section">
+          <div className="np-cover-banner" />
+          <div className="np-avatar-area">
+            <div className="np-avatar-container">
+              <img
+                src={userData.profilePic || "/images/squarepfp.png"}
+                alt={userData.username}
+                className="np-avatar-img"
+                onError={(e) => { e.target.src = "/images/squarepfp.png"; }}
+              />
+              {isOnline && <span className="np-online-dot" title="Online now" />}
+            </div>
+
+            <div className="np-profile-identity">
+              <h1 className="np-username">
+                @{userData.username}
+                {isOnline && (
+                  <span style={{ fontSize: "12px", color: "#22c55e", fontWeight: 600, marginLeft: "8px" }}>
+                    ● Online
+                  </span>
+                )}
+              </h1>
+              <p className="np-fullname">{userData.fullname}</p>
+              {userData.bio && <p className="np-bio">"{userData.bio}"</p>}
+              {userData.collegeName && <p className="np-college">🎓 {userData.collegeName}</p>}
+            </div>
+
+            <div className="np-header-actions">
+              {/* Connection & Mutual badges */}
+              <div className="np-connection-badges">
+                {connectionStatus?.connection && (
+                  <span className="np-badge-connected">🤝 Connected</span>
+                )}
+                {mutualFriendsCount > 0 && (
+                  <span className="np-badge-mutual">👥 {mutualFriendsCount} Mutual</span>
+                )}
+              </div>
+              <div className="np-other-actions">
+                <button
+                  onClick={handleFollowToggle}
+                  disabled={loading}
+                  className={`${isFollowing ? "np-btn-unfollow" : "np-btn-follow"} ${loading ? "np-btn-disabled" : ""}`}
+                >
+                  {loading ? "..." : isFollowing ? "Unfollow" : "Follow"}
+                </button>
+                <button className="np-btn-chat" onClick={startChat}>
+                  <FiMessageSquare size={14} style={{ marginRight: 4 }} /> Chat
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Stats Bar ── */}
+        <div className="np-stats-bar">
+          <div className="np-stat-item">
+            <span className="np-stat-number">{userData.postsCount || 0}</span>
+            <span className="np-stat-label">Posts</span>
+          </div>
+          <div className="np-stat-divider" />
+          <div className="np-stat-item">
+            <span className="np-stat-number">{userData.followers?.length || 0}</span>
+            <span className="np-stat-label">Followers</span>
+          </div>
+          <div className="np-stat-divider" />
+          <div className="np-stat-item">
+            <span className="np-stat-number">{userData.following?.length || 0}</span>
+            <span className="np-stat-label">Following</span>
+          </div>
+          <div className="np-stat-divider" />
+          <div className="np-stat-item">
+            <span className="np-stat-number">{mutualFriendsCount}</span>
+            <span className="np-stat-label">Mutual</span>
+          </div>
+        </div>
+
+        {/* ── Main Content Grid ── */}
+        <div className="np-content-grid">
+          {/* Left Column */}
+          <div className="np-left-col">
+            <div className="np-card">
+              <h3 className="np-card-title">Contact Info</h3>
+              <InfoRow icon={<FiMail />} label="Email" value={userData.email} />
+              <InfoRow icon={<FiPhone />} label="Mobile" value={userData.mobileNumber} />
+              <InfoRow icon={<FiGlobe />} label="Website" value={userData.website} />
+            </div>
+
+            <div className="np-card">
+              <h3 className="np-card-title">Basic Info</h3>
+              <InfoRow icon={<FiBook />} label="School" value={userData.school} />
+              <InfoRow icon={<FiHome />} label="Hometown" value={userData.hometown} />
+              <InfoRow icon={<FiMapPin />} label="Residence" value={userData.residence} />
+              <InfoRow icon={<FiCalendar />} label="Birthday" value={formatDate(userData.dateOfBirth)} />
+              <InfoRow icon="🎓" label="High School" value={userData.highschool} />
+              <InfoRow icon="💼" label="Status" value={userData.status} />
+              <InfoRow icon="⚧" label="Gender" value={userData.gender} />
+            </div>
+
+            <div className="np-card">
+              <h3 className="np-card-title">Personal Info</h3>
+              <InfoRow icon={<FiHeart />} label="Relationship" value={userData.relationshipStatus} />
+              <InfoRow icon="👀" label="Looking For" value={userData.lookingfor} />
+              <InfoRow icon="✨" label="Interested In" value={userData.interestedIn} />
+              {userData.bestFriend && userData.bestFriend.length > 0 && (
+                <div className="np-info-row">
+                  <span className="np-info-icon">⭐</span>
+                  <div className="np-info-text">
+                    <span className="np-info-label">Best Friends</span>
+                    <span className="np-info-value">
+                      {userData.bestFriend.map(f => f?.username || f).join(", ")}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="np-right-col">
+            {friends.length > 0 && (
+              <div className="np-card">
+                <h3 className="np-card-title">Friends</h3>
+                <div className="np-friends-grid">
+                  {friends.map((friend) => (
+                    <div key={friend._id} className="np-friend-card">
+                      <img
+                        src={friend.profilePic || "/images/squarepfp.png"}
+                        alt={friend.username}
+                        className="np-friend-pic"
+                        onError={(e) => { e.target.src = "/images/squarepfp.png"; }}
+                      />
+                      <p className="np-friend-name">{friend.username}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="np-card">
+              <h3 className="np-card-title">Interests & Favorites</h3>
+              <div className="np-interests-grid">
+                <InterestTag emoji="🎮" label="Game" value={userData.favoriteGame} />
+                <InterestTag emoji="🎵" label="Music" value={userData.favoriteMusic} />
+                <InterestTag emoji="🎬" label="Movie" value={userData.favoriteMovie} />
+                <InterestTag emoji="⚽" label="Sport" value={userData.favoriteSport} />
+                <InterestTag emoji="📺" label="Anime" value={userData.favoriteAnime} />
+                <InterestTag emoji="🌟" label="Actor" value={userData.favoriteActor} />
+              </div>
+              {userData.interests && (
+                <div className="np-interests-text">
+                  <span className="np-info-label">Interests</span>
+                  <p className="np-interests-desc">{userData.interests}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="np-card np-account-card">
+              <h3 className="np-card-title">Account Info</h3>
+              <div className="np-account-row">
+                <span className="np-account-label">Member Since</span>
+                <span className="np-account-value">{userData.createdAt?.split("T")[0]}</span>
+              </div>
+              <div className="np-account-row">
+                <span className="np-account-label">Last Updated</span>
+                <span className="np-account-value">{userData.updatedAt?.split("T")[0]}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Posts Section ── */}
+        <div className="np-tabs-container">
+          <div className="np-tabs">
+            <button className="np-tab active">
+              Posts
+            </button>
+          </div>
+
+          <div className="np-post-grid">
+            {posts.map((post) => (
+              <div
+                key={post._id}
+                className="np-post-cell"
+                onClick={() => setSelectedPost(post)}
+              >
+                {post.postType === "image" && post.content?.mediaUrl && (
+                  <img src={post.content.mediaUrl} alt="Post" className="np-post-media" />
+                )}
+                {post.postType === "video" && post.content?.mediaUrl && (
+                  <video className="np-post-media" muted>
+                    <source src={post.content.mediaUrl} type="video/mp4" />
+                  </video>
+                )}
+                {post.postType === "text" && (
+                  <div className="np-post-text-preview">
+                    <p>{post.caption}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+            {posts.length === 0 && (
+              <div className="np-no-posts">
+                <p>No posts to show here.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Post Viewer Modal ── */}
+      {selectedPost && (
+        <div className="np-modal-backdrop" onClick={() => setSelectedPost(null)}>
+          <div className="np-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="np-modal-close" onClick={() => setSelectedPost(null)}>✖</button>
+            
+            <div className="np-modal-header">
+              <img
+                src={selectedPost.user?.profilePic || userData.profilePic || "/images/squarepfp.png"}
+                alt="Profile"
+                className="np-modal-avatar"
+                onError={(e) => { e.target.src = "/images/squarepfp.png"; }}
+              />
+              <strong className="np-modal-username">
+                {selectedPost.user?.username || userData.username}
+              </strong>
+            </div>
+
+            {selectedPost.caption && (
+              <p className="np-modal-caption">{selectedPost.caption}</p>
+            )}
+
+            <div className="np-modal-media-container">
+              {selectedPost.postType === "image" && selectedPost.content?.mediaUrl && (
+                <img src={selectedPost.content.mediaUrl} alt="Post content" className="np-modal-img" />
+              )}
+              {selectedPost.postType === "video" && selectedPost.content?.mediaUrl && (
+                <video controls className="np-modal-video">
+                  <source src={selectedPost.content.mediaUrl} type="video/mp4" />
+                </video>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default OtherProfile;
