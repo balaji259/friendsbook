@@ -14,7 +14,7 @@ import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 
 const Sidebar=() => {
     // const {getUsers,clearUsers, users,selectedUser,setSelectedUser,isUsersLoading}=useChatStore();
-    const { getUsers,clearUsers,users, selectedUser, setSelectedUser, chatUserId, setChatUserId, isUsersLoading } = useChatStore();
+    const { getUsers,clearUsers,users, selectedUser, setSelectedUser, chatUserId, setChatUserId, isUsersLoading, unreadCounts, markAsRead } = useChatStore();
     const {onlineUsers} =useSocket();
 
     // const onlineUsers=[];
@@ -47,9 +47,7 @@ const Sidebar=() => {
       const handleUserSelect = (user) => {
         setSelectedUser(user);
         setChatUserId(user._id);
-        // const newUrl = new URLSearchParams(location.search);
-        // newUrl.set("chatUserId", user._id); // Add `chatUserId` to URL
-        // navigate(`${location.pathname}?${newUrl.toString()}`); // Preserve current path
+        markAsRead(user._id); // Clear unread badge when opening the chat
       };
 
    
@@ -113,18 +111,19 @@ const Sidebar=() => {
                     >
                     <div className="relative mx-auto lg:mx-0">
                         <img 
-                            // src={user.profilePic || "/avatar.png"}
                             src={user.profilePic === '/images/squarepfp.png' ? '/images/squarepfp.png' : `${user.profilePic}`}
                             alt={user.name}
                             className="size-12 object-cover rounded-md"
                         />
-                        {/* {onlineUsers.includes(user._id) && (
-                            <span className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-zinc-900" />
-                                
-                        )}  */}
                         {onlineUsers && Array.isArray(onlineUsers) && onlineUsers.includes(user._id) && (
     <span className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-zinc-900" />
 )}
+                        {/* Unread message badge */}
+                        {unreadCounts[user._id] > 0 && (
+                            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 ring-2 ring-white">
+                                {unreadCounts[user._id] > 99 ? '99+' : unreadCounts[user._id]}
+                            </span>
+                        )}
                     </div>
 
                     {/*userinfo -nly visible on larger screens */}

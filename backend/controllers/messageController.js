@@ -39,7 +39,7 @@ const getMessages=async (req,res)=>{
                 {senderId:myId, receiverId:userToChatId},
                 {senderId:userToChatId, receiverId:myId}
             ]
-            })
+            }).sort({ createdAt: 1 });
             res.status(200).json(messages);
         }
         catch(e){
@@ -76,9 +76,11 @@ const sendMessage=async (req,res)=>{
         await newMessage.save();
 
         //real time functinlity goes here!
-        const receiverSocketId = getReceiverSocketId(receiverId);
-        if(receiverSocketId){
-            io.to(receiverSocketId).emit("newMessage",newMessage);
+        const receiverSocketIds = getReceiverSocketId(receiverId);
+        if(receiverSocketIds.length > 0){
+            receiverSocketIds.forEach(socketId => {
+                io.to(socketId).emit("newMessage", newMessage);
+            });
         }
 
 

@@ -7,8 +7,7 @@ const MessageInput = () => {
     const [mediaPreview, setMediaPreview] = useState(null);
     const [mediaType, setMediaType] = useState(null);
     const [isSending, setIsSending] = useState(false);
-    const [abortController, setAbortController] = useState(null);
-    
+
     const fileInputRef = useRef(null);
     const { sendMessages } = useChatStore();
 
@@ -40,46 +39,23 @@ const MessageInput = () => {
         if (!text.trim() && !mediaPreview) return;
 
         setIsSending(true);
-        const controller = new AbortController();
-        setAbortController(controller);
 
         try {
-            console.log("before sending message");
-            await sendMessages(
-                {
-                    text: text.trim(),
-                    media: mediaPreview,
-                    mediaType,
-                },
-                controller.signal
-            );
-            console.log("after sending message");
+            await sendMessages({
+                text: text.trim(),
+                media: mediaPreview,
+                mediaType,
+            });
             setText("");
             setMediaPreview(null);
             setMediaType(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
-
-            
         } catch (e) {
-            if (e.name === "AbortError") {
-                console.log("Message sending canceled.");
-            } else {
-                alert("Failed to send the message.");
-                console.error(e);
-            }
+            alert("Failed to send the message.");
+            console.error(e);
         } finally {
             setIsSending(false);
-            setAbortController(null);
         }
-    };
-
-    const cancelSending = () => {
-        if (abortController) abortController.abort();
-        setIsSending(false);
-        setMediaPreview(null);
-        setMediaType(null);
-        setText("");
-        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     return (
@@ -105,6 +81,7 @@ const MessageInput = () => {
                             className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300 flex items-center justify-center"
                             type="button"
                             aria-label="Remove media"
+                            disabled={isSending}
                         >
                             <X className="size-3" />
                         </button>
@@ -119,6 +96,7 @@ const MessageInput = () => {
                         placeholder="Type a message here!"
                         value={text}
                         onChange={(e) => setText(e.target.value)}
+                        disabled={isSending}
                     />
                     <input
                         type="file"
@@ -134,6 +112,7 @@ const MessageInput = () => {
                         }`}
                         onClick={() => fileInputRef.current?.click()}
                         aria-label="Attach media"
+                        disabled={isSending}
                     >
                         <Image size={20} />
                     </button>
@@ -149,16 +128,6 @@ const MessageInput = () => {
                         <Send size={22} />
                     )}
                 </button>
-                {/* {isSending && (
-                    <button
-                        type="button"
-                        onClick={cancelSending}
-                        className="btn btn-sm btn-circle text-red-500"
-                        aria-label="Cancel sending"
-                    >
-                        Cancel
-                    </button>
-                )} */}
             </form>
         </div>
     );

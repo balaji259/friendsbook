@@ -73,13 +73,6 @@ const  ChatContainer = () =>{
     },[messages]);
 
 
-    useEffect(() => {
-      // const chatUserId = searchParams.get("chatUserId");
-      if (chatUserId) {
-        // Set selected user based on URL
-        getMessages(chatUserId);
-      }
-    }, [chatUserId, getMessages]);
 
 
 
@@ -97,7 +90,7 @@ const  ChatContainer = () =>{
         return () => unsubscribeFromMessages(socket);
 
 
-    },[selectedUser._id,getMessages,subscribeToMessages,unsubscribeFromMessages]);
+    },[selectedUser._id, socket, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
     if(isMessagesLoading) return (
         <div className="flex-1 flex flex-col overflow-auto">
@@ -120,11 +113,11 @@ const  ChatContainer = () =>{
   <ChatHeader />
 
   <div className="flex-1 overflow-y-auto p-4 space-y-4">
-    {messages.map((message) => (
+    {messages.map((message, index) => (
       <div
         key={message._id}
         className={`flex ${message.senderId === userId ? "justify-end" : "justify-start"}`}
-        ref={messageEndRef}
+        ref={index === messages.length - 1 ? messageEndRef : null}
       >
         {/* Profile Picture */}
         <div className="flex-shrink-0">

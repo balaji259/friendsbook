@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { io } from "socket.io-client";
 
-const backendBaseUrl = "https://friendsbook-cy0f.onrender.com";
+const backendBaseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:7000";
 const renderurl="https://socialmedia-backend-2njs.onrender.com";
 
 // Create Context
@@ -56,10 +56,11 @@ useEffect(() => {
  
 
     // Pass the token during the connection
-  const newSocket = io("/", {
+  const newSocket = io(backendBaseUrl, {
     auth: {
       token, // Include the token in the WebSocket handshake
     },
+    transports: ["websocket", "polling"],
   });
 
     

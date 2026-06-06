@@ -1,10 +1,6 @@
 import {create} from "zustand";
-import { useContext } from "react";
 import toast from "react-hot-toast";
-import { jwtDecode } from 'jwt-decode';
-import {useSocket} from "./useSocket";
 import api from "../api/api";
-import { AuthContext } from "./AuthContext";
 
 export const useChatStore = create((set,get)=>({
     
@@ -16,10 +12,9 @@ export const useChatStore = create((set,get)=>({
     chatUserId: null, 
     isUsersLoading:false,
     isMessagesLoading:false,
+    unreadCounts: {},
 
     profileId:null,
-
-
 
 
 
@@ -81,25 +76,18 @@ export const useChatStore = create((set,get)=>({
     sendMessages: async(messageData)=>{
         const {selectedUser,messages}=get();
 
-        
-
         try{
-            console.log("checking msg at star5t");
-            console.log(messages);
             const token=localStorage.getItem('token');
               if(!token){
                 alert("no token");
                 return;
             }
             const res=await api.post(`/messages/send/${selectedUser._id}`,messageData,{
-            
                 headers: {
                   Authorization: `Bearer ${token}`,
                 },
-
               });
 
-       
             set({messages:[...messages,res.data]})
 
             //start ntifictaion
@@ -145,14 +133,30 @@ export const useChatStore = create((set,get)=>({
         if(!selectedUser || !socket) return;
 
         socket.on("newMessage",(newMessage) => {
-            const {messages} = get();
+            // Only append the message if it's from the user we're currently chatting with.
+            // This prevents messages from other users leaking into the active chat window.
+            const currentSelectedUser = get().selectedUser;
+            const isFromActiveChat =
+                newMessage.senderId === currentSelectedUser?._id ||
+                newMessage.receiverId === currentSelectedUser?._id;
+
+            if (!isFromActiveChat) {
+                // Increment unread count for the sender so the sidebar can show a badge
+                set((state) => ({
+                    unreadCounts: {
+                        ...state.unreadCounts,
+                        [newMessage.senderId]: (state.unreadCounts[newMessage.senderId] || 0) + 1,
+                    },
+                }));
+                return;
+            }
+
+            // Use functional updater (state.messages) to avoid stale closure race conditions
+            // when multiple messages arrive in quick succession.
             set((state) => ({
-                messages:[...messages,newMessage],
-            })); 
+                messages: [...state.messages, newMessage],
+            }));
         });
-
-        
-
     }, 
 
     unsubscribeFromMessages:(socket) =>{
@@ -220,6 +224,12 @@ export const useChatStore = create((set,get)=>({
     setSelectedUser:(selectedUser)=> set({selectedUser}),
     setChatUserId: (chatUserId) => set({ chatUserId }),
     setProfileId:(profileId) => set({ profileId }),
+
+    markAsRead: (userId) => set((state) => {
+        const updated = { ...state.unreadCounts };
+        delete updated[userId];
+        return { unreadCounts: updated };
+    }),
 
     clearUsers: () => {
         set({ users: [], selectedUser: null });
