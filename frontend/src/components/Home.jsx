@@ -27,10 +27,6 @@ const Home = () => {
   const {user,setUser,socket,connectSocket}= useSocket();
   const [isLoading, setIsLoading] = useState(true); 
     const { token, authuser } = useContext(AuthContext);
-  // const backendBaseUrl="http://localhost:7000"; 
-
-  // const renderurl="https://socialmedia-backend-2njs.onrender.com";
-
   const navigate=useNavigate();
  
 useEffect(()=>{
@@ -132,11 +128,7 @@ const fetchUserDetails = async () => {
   try {
     // console.log("start");
 
-    const response = await api.get(`/user/getdetails`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await api.get(`/user/getdetails`);
 
     // console.log("end");
 
@@ -213,12 +205,7 @@ const fetchUserDetails = async () => {
   async function getUser(){
     try{
       const token=localStorage.getItem("token");
-      const res=await api.get(`/user/getUser`,{
-        headers: {
-          Authorization:`Bearer ${token}`,
-        },
-        
-        })
+      const res=await api.get(`/user/getUser`);
       //  console.log("setting res.data");
       //  console.log(res.data);
         setUser(res.data);

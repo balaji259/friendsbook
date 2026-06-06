@@ -368,7 +368,6 @@ const PostComponent = () => {
   const [openComments, setOpenComments] = useState({});
   const [replyingTo, setReplyingTo] = useState({}); // Tracks which comment's reply input is open
   const [replyTexts, setReplyTexts] = useState({}); // Stores reply text for each comment
-  const [currentuserId,setcurrentuserId]=useState({});
   const {onlineUsers} =useSocket();
   const [isPosting,setIsPosting]=useState(false);
   const {profileId, setProfileId} =useChatStore();
@@ -390,9 +389,7 @@ const PostComponent = () => {
   }
 
   try {
-    const response = await api.get(`/posts/get`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const response = await api.get(`/posts/get`);
 
     // console.log("setting posts!");
     // console.log(response.data);
@@ -407,30 +404,8 @@ const PostComponent = () => {
   }
 };
 
-  const fetchuserId= async ()=>{
-    try{
-   
-
-      // Decode the JWT token to get the userId
-      const payload = parseJwt(token);
-      if (!payload || !payload.userId) {
-          alert("User not authenticated. Please log in again.");
-          return;
-      }
-  
-        setcurrentuserId(payload.userId);
-      
-    }
-    catch(e){
-      console.log(e?.message);
-    }
-  }
-
-
   useEffect(() => {
     fetchPosts();
-    fetchuserId();
-    
   }, []);
 
   
@@ -455,23 +430,6 @@ const PostComponent = () => {
         return;
     }
 
-    // Decode userId from token in parallel
-    const decodeUserId = new Promise((resolve, reject) => {
-        try {
-            const base64Url = token.split(".")[1];
-            const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-            const jsonPayload = decodeURIComponent(
-                atob(base64)
-                    .split("")
-                    .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-                    .join("")
-            );
-            resolve(JSON.parse(jsonPayload).userId);
-        } catch (error) {
-            reject(error);
-        }
-    });
-
     let mediaUrl = null;
 
     // Upload media to Cloudinary in parallel (if media exists)
@@ -495,25 +453,19 @@ const PostComponent = () => {
         : Promise.resolve(null);
 
     try {
-        const [userId, uploadedMediaUrl] = await Promise.all([decodeUserId, uploadMedia]);
+        const uploadedMediaUrl = await uploadMedia;
         mediaUrl = uploadedMediaUrl;
 
         // Prepare formData
         const formData = new FormData();
-        formData.append("userId", userId);
+        formData.append("userId", authuser.userId);
         if (postContent?.trim()) formData.append("captionOrText", postContent.trim());
         if (mediaUrl) formData.append("mediaContent", mediaUrl);
 
         // Send to backend
-       const response = await api.post(
+        const response = await api.post(
         `/posts/create`,
-        formData,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "multipart/form-data",
-            },
-        }
+        formData
     );
           
                   setPostContent(null);
@@ -551,11 +503,7 @@ const PostComponent = () => {
     try {
   // ✅ Like/Unlike post
   const likeResponse = await api.post(
-    `/posts/like/${authuser.userId}/${postId}`,
-    {}, // No request body needed here
-    {
-      headers: { Authorization: `Bearer ${token}` }
-    }
+    `/posts/like/${authuser.userId}/${postId}`
   );
 
   const data = likeResponse.data; 
@@ -613,31 +561,14 @@ const PostComponent = () => {
   };
 
 
-  const reportPost = (postId) => {
-    const token = localStorage.getItem("token");
-
-    // Decode the JWT token to get the userId
-    const payload = parseJwt(token);
-    if (!payload || !payload.userId) {
+const reportPost = (postId) => {
+    if (!authuser || !authuser.userId) {
         alert("User not authenticated. Please log in again.");
         return;
     }
 
-    const userId = payload.userId;
-
     // Redirect to the report page with query parameters
     navigate(`/report?postId=${postId}`);
-};
-
-const parseJwt = (token) => {
-    try {
-        const base64Url = token.split(".")[1];
-        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-        return JSON.parse(window.atob(base64));
-    } catch (error) {
-        console.error("Invalid token format");
-        return null;
-    }
 };
 
 
@@ -655,13 +586,7 @@ const savePost = async (postId)  => {
   try {
     const response = await api.post(
       "/posts/save",
-      saveData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
-      }
+      saveData
     );
 
     if (response.data.success) {
@@ -683,7 +608,7 @@ const savePost = async (postId)  => {
 
 const copyPostIdToClipboard = (postId) => {
   const postUrl = `/posts/${postId}`; 
-  navigator.clipboard.writeText(`https://friendsbook-app.onrender.com${postUrl}`)
+  navigator.clipboard.writeText(`${window.location.origin}${postUrl}`)
     .then(() => toast.success("Post link copied! Share it anywhere."))
     .catch(err => console.error('Failed to copy:', err));
 };
@@ -692,11 +617,7 @@ const copyPostIdToClipboard = (postId) => {
 
 const deletePost = async (postId) => {
   try {
-    const response = await api.delete(`/posts/${postId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`, 
-      },
-    });
+    const response = await api.delete(`/posts/${postId}`);
 
     
     toast.success("Post deleted successfully!", { duration: 1500 });
@@ -728,13 +649,7 @@ setPosts((prevPosts) => {
   // 1️⃣ First API Call: Add Comment
   const response = await api.post(
     `/posts/comment/${postId}`,
-    { text: newComment },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    { text: newComment }
   );
 
   // console.log("✅ Comment Added:", response.data);
@@ -781,13 +696,7 @@ const handleAddReply = async (replyId) => {
   try {
   const response = await api.post(
     `/posts/comment/reply/${replyId}`,
-    { text: replyTexts[replyId] || "" },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
+    { text: replyTexts[replyId] || "" }
   );
 
   // console.log("✅ Reply Added:", response.data);
@@ -841,12 +750,12 @@ const toggleReplyInput = (replyId) => {
 const goToUserProfile = (userId) => {
   // navigate(`/profile/${userId}`); 
   setProfileId(userId);
-  // userId===currentuserId?navigate(`/profile`):navigate(`/other/${userId}`);
+  // userId===authuser.userId?navigate(`/profile`):navigate(`/other/${userId}`);
 };
 
 // useEffect(async ()=>{
 //   if(profileId!=null){
-//     if(profileId==currentuserId){
+//     if(profileId==authuser.userId){
       
 //       navigate('/profile');
 //     }
@@ -858,7 +767,7 @@ const goToUserProfile = (userId) => {
 //       await axios.post("http://localhost:7000/send-notification",
 //         {
 //           userId: profileId,    // The owner of the post
-//           senderId: currentuserId,         // The person who commented
+//           senderId: authuser.userId,         // The person who commented
 //           type: "Profile View Notification",
 //           title: "Profile View",
 //           body: "Viewed Your Profile ",    // Send the comment text as notification body
@@ -876,7 +785,7 @@ const goToUserProfile = (userId) => {
 //       alert("navigating to other profile! ");
 //       console.log("before navigating!");
 //       console.log(profileId)
-//       console.log(currentuserId);
+//       console.log(authuser.userId);
 
 //       navigate('/other');
 //     }
@@ -886,27 +795,18 @@ const goToUserProfile = (userId) => {
 useEffect(() => {
   const sendNotification = async () => {
     if (profileId != null) {
-      if (profileId === currentuserId) {
+      if (profileId === authuser.userId) {
         navigate('/profile');
       } else {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-
         try {
-          await axios.post(
+          await api.post(
             "/send-notification",
             {
               userId: profileId, // The owner of the post
-              senderId: currentuserId, // The person who commented
+              senderId: authuser.userId, // The person who commented
               type: "Profile View Notification",
               title: "Profile View",
               body: "Viewed Your Profile", // Send the comment text as notification body
-            },
-            {
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
             }
           );
 
@@ -1267,7 +1167,7 @@ return (
 
                 <div style={menuItemStyle} onClick={() => reportPost(post.postId)}>Report</div>
                 {/* //delete */}
-                {post.userId._id === currentuserId && (
+                {post.userId._id === authuser.userId && (
                 <div style={menuItemStyle} onClick={() => deletePost(post.postId)}>Delete</div>
                 )}
               </div>
@@ -1369,14 +1269,14 @@ return (
             {/* Like button content */}
           {/* </button> */}
           <button className="mr-4" onClick={() => toggleReplyInput(comment.commentId)}>Reply</button>
-          {/* {comment.user.userId === currentuserId && (
+          {/* {comment.user.userId === authuser.userId && (
             <>
               <button onClick={() => handleEditComment(comment.commentId)}>Edit</button>
               <button onClick={() => handleDeleteComment(comment.commentId)}>Delete</button>
             </>
           )} */}
 
-      {comment.user.userId === currentuserId && (
+      {comment.user.userId === authuser.userId && (
         <>
           {editingCommentId === comment.commentId ? (
             <>
@@ -1415,7 +1315,7 @@ return (
       ) : (
         <>
           {reply.text}
-          {reply.user.userId === currentuserId && (
+          {reply.user.userId === authuser.userId && (
             <div>
               <button className="mr-4" onClick={() => handleEditReply(comment.commentId, reply.replyId,reply.text)}>Edit</button>
               <button onClick={() => handleDeleteReply(comment.commentId, reply.replyId)}>Delete</button>
