@@ -1,66 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import Navbar from "./Navbar";
 import Dashboard from "./Dashboard";
 import Quote from "./Quote.jsx";
 import FetchFriends from "./FetchFriends.jsx";
-import { fetchUserDetails } from "./userPosts.js";
 import {useSocket} from "./useSocket";
-import axios from "axios";
+import api from "../api/api";
+import { AuthContext } from "./AuthContext";
 
 const Friends = () => {
-  const [currentuser, setCurrentUser] = useState({ username: "", profilePic: "" });
+  const { authuser } = useContext(AuthContext);
   const {user,setUser,socket,connectSocket}= useSocket();
   const [isLoading, setIsLoading] = useState(true); 
-  const backendBaseUrl="http://localhost:7000"; 
-  const renderurl="https://socialmedia-backend-2njs.onrender.com";
 
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    const getUserDetails = async () => {
-      try{
-
-        const userDetails = await fetchUserDetails(token);
-        if (userDetails) {
-          setCurrentUser({
-            username: userDetails.username,
-            profilePic: userDetails.profilePic,
-          });
-        }
-      }
-      catch(e){
+    const getUser = async () => {
+      try {
+        const res = await api.get(`/user/getUser`);
+        setUser(res.data);
+      } catch (e) {
         console.log(e);
-      }
-      finally{
+      } finally {
         setIsLoading(false);
       }
     };
 
-    getUserDetails();
-  }, []);
-
-  async function getUser(){
-    try{
-        const token=localStorage.getItem("token");
-        const res=await axios.get(`/user/getUser`,{
-            headers: {
-                Authorization:`Bearer ${token}`,
-            },
-
-        })
-     
-        setUser(res.data);
-    }
-    catch(e){
-        console.log(e);
-    }
-}
-
-useEffect(()=>{
-    
     getUser();
-},[]);
+  }, [setUser]);
 
 if(isLoading)
 {
@@ -132,7 +98,7 @@ if(isLoading)
     <div style={styles.container}>
       {/* Navbar */}
       <div style={styles.navbar}>
-        <Navbar username={currentuser.username} profilePic={currentuser.profilePic} />
+        <Navbar username={authuser?.username} profilePic={authuser?.profilePic} />
       </div>
 
       {/* Main content wrapper */}

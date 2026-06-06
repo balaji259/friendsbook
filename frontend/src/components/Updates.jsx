@@ -329,13 +329,24 @@ export default function Updates() {
       </div> */}
 
 <div className="bg-[#3B5998] text-white p-4 flex items-center justify-between shadow-md">
-        <div className="text-xl font-bold">friendsbook</div>
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="text-white font-medium text-md hover:bg-[#1d325e] px-3 py-1 rounded-md flex items-center gap-2 transition duration-200"
+            title="Go Back"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+          <div className="text-xl font-bold">friendsbook</div>
+        </div>
         <div className="flex space-x-4">
       
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto bg-white border border-gray-300 mt-5 p-5">
+      <div className="max-w-2xl mx-auto bg-white border border-gray-300 mt-2 p-5">
         <div className="border-b border-gray-300 flex space-x-5 mb-5">
 
         <button

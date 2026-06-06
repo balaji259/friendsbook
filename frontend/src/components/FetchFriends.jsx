@@ -1,34 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {useNavigate} from "react-router-dom";
-import axios from 'axios';
+import api from '../api/api';
 import {useSocket} from "./useSocket";
 import { useChatStore } from "./useChatStore";
+import { AuthContext } from "./AuthContext";
+
 const FriendsList = () => {
   const [friends, setFriends] = useState([]);
-  const [userId, setUserId] = useState(null); // Initialize with `null` to avoid premature API calls
+  const [isLoading, setIsLoading] = useState(true);
   const { users, selectedUser, setSelectedUser, chatUserId, setChatUserId, profileId, setProfileId } = useChatStore();
-  const backendBaseUrl = "http://localhost:7000";
-  const renderurl="https://socialmedia-backend-2njs.onrender.com";
   const navigate=useNavigate();
   const {onlineUsers} =useSocket();
-  const getUserIdFromToken = () => {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
+  const { authuser } = useContext(AuthContext);
+  const userId = authuser?.userId;
 
-
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      console.log("Payload:", payload.userId);
-      setUserId(payload.userId); // Set the userId
-    } catch (error) {
-      console.error("Error decoding token:", error);
-    }
-  };
-  
-  useEffect(() => {
-    getUserIdFromToken(); // Fetch userId from token
-  }, []); // Run only on component mount
-  
   useEffect(() => {
     if (!userId) return; // Avoid API call until userId is available
 
@@ -38,12 +23,14 @@ const FriendsList = () => {
     const fetchFriends = async () => {
       try {
         console.log("Fetching friends for userId:", userId);
-        const response = await axios.get(`/user/${userId}/friends`);
+        const response = await api.get(`/user/${userId}/friends`);
         
-        setFriends(response.data.friends);
+        setFriends(response.data.friends || []);
       
       } catch (error) {
         console.error("Error fetching friends:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -75,8 +62,52 @@ const FriendsList = () => {
     };
 
 
+  if (isLoading) {
+    return (
+      <div className="w-full h-full flex justify-center items-center">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (friends.length === 0) {
+    return (
+      <div className="w-full max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto p-4 sm:p-8 bg-[#d5d5d5] min-h-screen flex flex-col">
+        {/* Back Button */}
+        <div className="mb-4 sm:mb-6 self-start">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition duration-200 text-gray-700 font-semibold"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+            </svg>
+            Back
+          </button>
+        </div>
+
+        <div className="flex-1 flex justify-center items-center p-8">
+          <p className="text-gray-500 text-lg">No friends yet. Start following people!</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto p-4 sm:p-8 bg-[#d5d5d5] min-h-screen">
+      {/* Back Button */}
+      <div className="mb-4 sm:mb-6">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition duration-200 text-gray-700 font-semibold"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+          Back
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {friends.map((friend) => (
           <div

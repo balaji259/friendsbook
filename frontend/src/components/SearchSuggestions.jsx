@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/api";
 import { useSocket } from "./useSocket";
 import { useChatStore } from "./useChatStore";
-// import {useChatStore} from "./useChatStore";
 
 const SearchSuggestions = () => {
   const [query, setQuery] = useState("");
   const [suggestedUsers, setSuggestedUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const backendBaseUrl = "http://localhost:7000";
-  const renderurl="https://socialmedia-backend-2njs.onrender.com";
   const navigate = useNavigate();
   const { setChatUserId, profileId, setProfileId } = useChatStore();
   
@@ -35,10 +32,8 @@ const SearchSuggestions = () => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`/user/search/suggestions`, {
+      const response = await api.get(`/user/search/suggestions`, {
         params: { query },
-        headers: { Authorization: `Bearer ${token}` },
       });
 
       setSuggestedUsers(response.data.users);
@@ -57,12 +52,11 @@ const SearchSuggestions = () => {
 
   const handleFollowUnfollow = async (userId, action) => {
     try {
-      console.log(currentUserId,userId);
-      const token = localStorage.getItem("token");
-      await axios.post(`/user/search/${action}`,
-        { userId: currentUserId, targetId: userId },
-        { headers: { Authorization: `Bearer ${token} `} }
-      );
+      console.log(currentUserId, userId);
+      await api.post(`/user/search/${action}`, { 
+        userId: currentUserId, 
+        targetId: userId 
+      });
 
       setSuggestedUsers((prev) =>
         prev.map((user) =>
@@ -118,6 +112,19 @@ const SearchSuggestions = () => {
 
   return (
     <div className="w-full max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto p-4 sm:p-8 bg-[#d5d5d5] min-h-screen">
+      {/* Back Button */}
+      <div className="mb-4 sm:mb-6">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition duration-200 text-gray-700 font-semibold"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
+          </svg>
+          Back
+        </button>
+      </div>
+
       <div className="relative mb-8">
         <input
           type="text"

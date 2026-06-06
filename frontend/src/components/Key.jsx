@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
 import api from "../api/api";
-import {jwtDecode} from 'jwt-decode';
 import { toast } from 'react-hot-toast';
 import {useNavigate} from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -71,16 +70,7 @@ export default function Key() {
     try {
       const response = await api.post(
         '/key/activate',
-        { key: createKey,
-          userId
-
-        },
-
-        {
-          headers: {
-            Authorization: `Bearer ${token}` 
-          }
-        }
+        { key: createKey }
       );
   
     setKeyState({
@@ -108,15 +98,7 @@ const deactivateKey = async () => {
 
 
   try {
-    const response = await api.post(
-      '/key/deactivate',
-      { userId },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
+    const response = await api.post('/key/deactivate');
 
     toast.success(response.data.message || 'Friendsbook Key deactivated.');
     
@@ -166,14 +148,10 @@ const deactivateKey = async () => {
 
 
   const getUserProfile = async () => {
-  try {
-    console.log(`userId: ${userId}`);
-
-    const response = await api.get(`/user/viewProfile/${userId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      console.log(`userId: ${userId}`);
+  
+      const response = await api.get(`/user/viewProfile/${userId}`);
 
     console.log(response.data);
     setUserData(response.data);
@@ -236,12 +214,8 @@ useEffect(()=>{
       <span className="text-white text-lg font-semibold">Key Page</span>
     </div>
 
-    {/* Right Side: User Info */}
+    {/* Right Side: Removed User Info as requested */}
     <div className="flex items-center">
-      <span className="text-white mr-3">{userData?.username}</span>
-      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 font-bold">
-        {userData?.username?.charAt(0)}
-      </div>
     </div>
   </div>
 </header>
@@ -282,11 +256,14 @@ useEffect(()=>{
                   {/* <span className="font-medium">{userData.friendsbookKey.lastModified}</span> */}
 
                   <span className="font-medium">
-                    {new Date(userData?.friendsbookKey?.lastModified).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
+                    {userData?.friendsbookKey?.lastModified 
+                      ? new Date(userData.friendsbookKey.lastModified).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })
+                      : 'N/A'
+                    }
                   </span>
 
 

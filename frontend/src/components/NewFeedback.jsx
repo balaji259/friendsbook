@@ -1,5 +1,6 @@
-import { useState,useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { toast } from 'react-hot-toast';
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { AuthContext } from "./AuthContext";
 
@@ -8,25 +9,35 @@ const NewFeedbackForm = () => {
   const [feedbackPart, setFeedbackPart] = useState("");
   const [feedbackText, setFeedbackText] = useState("");
   const [includeSessionData, setIncludeSessionData] = useState(false);
-  const [contactMe, setContactMe] = useState(false);
   const [responseMessage, setResponseMessage] = useState(null); // State to store API response
   const [isError, setIsError] = useState(false); // State to track error
   // const [email,setEmail]=useState("");    
   const {token, authuser} = useContext(AuthContext);
+  const navigate = useNavigate();
 
-const {email} = authuser;
-
-
+const {email} = authuser || { email: "" };
 
 const handleSubmit = async (e) => {
   e.preventDefault();
+
+  if (!feedbackType) {
+    toast.error("Please select the kind of feedback you have.");
+    return;
+  }
+  if (!feedbackPart) {
+    toast.error("Please select the part of Friendsbook you are giving feedback on.");
+    return;
+  }
+  if (!feedbackText.trim()) {
+    toast.error("Please describe your feedback.");
+    return;
+  }
 
   const feedbackData = {
     feedbackType,
     feedbackPart,
     feedbackText,
     includeSessionData: includeSessionData ? "Selected" : "Not Selected",
-    contactMe: contactMe ? "Selected" : "Not Selected",
     email,
   };
 
@@ -44,7 +55,6 @@ const handleSubmit = async (e) => {
     setFeedbackPart("");
     setFeedbackText("");
     setIncludeSessionData(false);
-    setContactMe(false);
   } catch (error) {
     setResponseMessage("Error submitting feedback. Please try again.");
     setIsError(true);
@@ -58,10 +68,19 @@ const handleSubmit = async (e) => {
 
     <div className="min-h-screen bg-gray-200">
     {/* Navbar */}
-    <nav className="bg-white mb-4 p-2 shadow-md">
-     
-        <h1 className="text-xl pl-4 font-semibold text-[#3b5998]">friendsbook</h1>
-      
+    <nav className="bg-[#3B5998] text-white p-4 flex items-center justify-between shadow-md">
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="text-white font-medium text-md hover:bg-[#1d325e] px-3 py-1 rounded-md flex items-center gap-2 transition duration-200"
+          title="Go Back"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </button>
+        <div className="text-xl font-bold">friendsbook</div>
+      </div>
     </nav>
 
 
@@ -95,14 +114,11 @@ const handleSubmit = async (e) => {
             onChange={(e) => setFeedbackPart(e.target.value)}
           >
             <option value="">Please select</option>
-            <option value="Friend Feed">Friend Feed</option>
+            <option value="Feed">Feed</option>
             <option value="Profile">Profile</option>
-            <option value="FriendChat">FriendChat</option>
-            <option value="Groups">Groups</option>
-            <option value="Events">Events</option>
-            <option value="Photos & Videos">Photos & Videos</option>
-            <option value="FriendMarket">FriendMarket</option>
-            <option value="Advertisements">Advertisements</option>
+            <option value="Friends">Friends</option>
+            <option value="Chats">Chats</option>
+            <option value="Key">Key</option>
             <option value="Other">Other</option>
           </select>
 
@@ -124,15 +140,7 @@ const handleSubmit = async (e) => {
             <span className="text-sm text-gray-700">Include data about your current session to help us understand your feedback better (optional)</span>
           </div> */}
 
-          <div className="flex items-center mb-4">
-            <input
-              type="checkbox"
-              className="mr-2"
-              checked={contactMe}
-              onChange={() => setContactMe(!contactMe)}
-              />
-            <span className="text-sm text-gray-700">I’d like someone to contact me about my feedback (we can't respond to all feedbacks individually)</span>
-          </div>
+      
 
           <button
             type="submit"
