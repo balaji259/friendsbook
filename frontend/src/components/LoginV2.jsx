@@ -38,6 +38,13 @@ const LoginV2 = () => {
   const navigate = useNavigate();
   const {user, setUser ,socket, connectSocket}= useSocket();
 
+  // Forgot password states
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [resetOtp, setResetOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [isResetOtpSent, setIsResetOtpSent] = useState(false);
+
 
 
   // Handle input changes
@@ -171,7 +178,7 @@ api.post(`/auth/login`, { email:loginemail, password:loginpassword })
 }
 
 const handleGoogleLogin = async (x) => {
-  api.post(`/auth/login`, { email: x.email, isGoogleLogin: true })
+  api.post(`/auth/google`, { email: x.email, name: x.name, picture: x.picture })
     .then((response) => {
 
       // Bug fix #1: Google login must also respect the Friendsbook Key gate
@@ -198,6 +205,57 @@ const handleGoogleLogin = async (x) => {
       const msg = err.response?.data?.error || "Something went wrong!";
       toast.error(msg, { duration: 2000 });
     });
+};
+
+// Handle sending password reset OTP
+const handleSendResetOtp = async (e) => {
+  e.preventDefault();
+  if (!forgotEmail.trim()) {
+    toast.error("Email is required");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    await api.post("/auth/forgot-password", { email: forgotEmail });
+    toast.success("Reset OTP sent to your email!");
+    setIsResetOtpSent(true);
+  } catch (error) {
+    const msg = error.response?.data?.error || "Failed to send reset OTP";
+    toast.error(msg);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Handle resetting password
+const handleResetPassword = async (e) => {
+  e.preventDefault();
+  if (!resetOtp.trim() || !newPassword.trim()) {
+    toast.error("OTP and new password are required");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    await api.post("/auth/reset-password", {
+      email: forgotEmail,
+      otp: resetOtp,
+      newPassword: newPassword,
+    });
+    toast.success("Password reset successfully! Please log in.");
+    // Clear states and return to login screen
+    setShowForgotPassword(false);
+    setIsResetOtpSent(false);
+    setForgotEmail("");
+    setResetOtp("");
+    setNewPassword("");
+  } catch (error) {
+    const msg = error.response?.data?.error || "Password reset failed";
+    toast.error(msg);
+  } finally {
+    setLoading(false);
+  }
 };
 
 
@@ -355,80 +413,131 @@ const checkUser=async ()=>{
           
           <div className="relative z-10 w-full max-w-md mx-auto">
             {!isSignUp ? (
-              // Login Form
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <h2 className="text-3xl font-semibold mb-8">Log In</h2>
-                
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Email"
-                    value={loginemail}
-                    required
-                    onChange={(e) => setLoginemail(e.target.value)}
-                    className="w-full p-4 bg-white/10 border-0 rounded-lg text-white placeholder-white/70 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300"
-                  />
+              showForgotPassword ? (
+                // Forgot Password Form
+                <form className="space-y-6" onSubmit={!isResetOtpSent ? handleSendResetOtp : handleResetPassword}>
+                  <h2 className="text-3xl font-semibold mb-8">Reset Password</h2>
                   
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    value={loginpassword}
-                    required
-                    onChange={(e) => setLoginpassword(e.target.value)}
-                    className="w-full p-4 bg-white/10 border-0 rounded-lg text-white placeholder-white/70 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300"
-                  />
-                </div>
-                
-                <button type="submit" disabled={loading} className="w-full p-4 bg-white text-blue-700 font-bold rounded-lg hover:bg-gray-100 transform hover:-translate-y-1 transition-all duration-300 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed">
-                  Log In
-                </button>
-
-                
-
-                
-                {/* <div className="text-center">
-                  <a href="#" className="text-white/80 hover:text-white hover:underline">
-                    Forgot Password?
-                  </a>
-                </div> */}
-                
-               <div className="mt-8">
-                {/* <button className="w-full p-3 bg-white/10 border border-white/30 rounded-lg hover:bg-white/20 transition-all duration-300"> */}
-                    <div className="flex items-center justify-center space-x-3"> 
-                    {/* <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                    <span className="text-white text-base font-medium">Continue with Google</span> */}
-                    <GoogleLogin
-                        onSuccess={(res) => {
-                            let x = jwtDecode(res?.credential);
-                            handleGoogleLogin(x);
-                        }}
-                        onError={(err) => {
-                            // console.log(err, "Login Failed");
-                        }}
+                  {!isResetOtpSent ? (
+                    <div className="space-y-4">
+                      <p className="text-sm text-white/85 mb-2 leading-relaxed">
+                        Enter your email address below, and we will send you a 6-digit OTP to reset your password.
+                      </p>
+                      <input
+                        type="email"
+                        placeholder="Email Address"
+                        value={forgotEmail}
+                        required
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        className="w-full p-4 bg-white/10 border-0 rounded-lg text-white placeholder-white/70 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300"
                       />
-
+                      <button type="submit" disabled={loading} className="w-full p-4 bg-white text-blue-700 font-bold rounded-lg hover:bg-gray-100 transform hover:-translate-y-1 transition-all duration-300 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed">
+                        {loading ? "Sending..." : "Send Reset OTP"}
+                      </button>
                     </div>
-                {/* </button> */}
-                </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="text-sm text-white/85 mb-2 leading-relaxed">
+                        An OTP has been sent to your email. Enter it below along with your new password.
+                      </p>
+                      <input
+                        type="text"
+                        placeholder="6-Digit OTP"
+                        value={resetOtp}
+                        required
+                        onChange={(e) => setResetOtp(e.target.value)}
+                        className="w-full p-4 bg-white/10 border-0 rounded-lg text-white placeholder-white/70 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300"
+                      />
+                      <input
+                        type="password"
+                        placeholder="New Password"
+                        value={newPassword}
+                        required
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="w-full p-4 bg-white/10 border-0 rounded-lg text-white placeholder-white/70 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300"
+                      />
+                      <button type="submit" disabled={loading} className="w-full p-4 bg-white text-blue-700 font-bold rounded-lg hover:bg-gray-100 transform hover:-translate-y-1 transition-all duration-300 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed">
+                        {loading ? "Resetting..." : "Reset Password"}
+                      </button>
+                    </div>
+                  )}
+                  
+                  <div className="text-center mt-6">
+                    <span 
+                      onClick={() => {
+                        setShowForgotPassword(false);
+                        setIsResetOtpSent(false);
+                      }}
+                      className="text-white font-bold cursor-pointer hover:underline text-sm"
+                    >
+                      Back to Log In
+                    </span>
+                  </div>
+                </form>
+              ) : (
+                // Login Form
+                <form className="space-y-6" onSubmit={handleSubmit}>
+                  <h2 className="text-3xl font-semibold mb-8">Log In</h2>
+                  
+                  <div className="space-y-4">
+                    <input
+                      type="text"
+                      placeholder="Email"
+                      value={loginemail}
+                      required
+                      onChange={(e) => setLoginemail(e.target.value)}
+                      className="w-full p-4 bg-white/10 border-0 rounded-lg text-white placeholder-white/70 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300"
+                    />
+                    
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={loginpassword}
+                      required
+                      onChange={(e) => setLoginpassword(e.target.value)}
+                      className="w-full p-4 bg-white/10 border-0 rounded-lg text-white placeholder-white/70 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all duration-300"
+                    />
+                  </div>
+                  
+                  <button type="submit" disabled={loading} className="w-full p-4 bg-white text-blue-700 font-bold rounded-lg hover:bg-gray-100 transform hover:-translate-y-1 transition-all duration-300 shadow-lg disabled:opacity-60 disabled:cursor-not-allowed">
+                    Log In
+                  </button>
 
-                
+                  <div className="text-center">
+                    <span 
+                      onClick={() => setShowForgotPassword(true)} 
+                      className="text-white/80 hover:text-white hover:underline cursor-pointer text-sm font-semibold"
+                    >
+                      Forgot Password?
+                    </span>
+                  </div>
+                  
+                 <div className="mt-8">
+                      <div className="flex items-center justify-center space-x-3"> 
+                      <GoogleLogin
+                          text="signin_with"
+                          onSuccess={(res) => {
+                              let x = jwtDecode(res?.credential);
+                              handleGoogleLogin(x);
+                          }}
+                          onError={(err) => {
+                              // console.log(err, "Login Failed");
+                          }}
+                        />
+                      </div>
+                  </div>
 
-                
-                <div className="text-center mt-6 text-white/80">
-                  Don't have an account?{' '}
-                  <span 
-                    onClick={() => setIsSignUp(true)}
-                    className="text-white font-bold cursor-pointer hover:underline"
-                  >
-                    Sign Up
-                  </span>
-                </div>
-              </form>
+                  <div className="text-center mt-6 text-white/80">
+                    Don't have an account?{' '}
+                    <span 
+                      onClick={() => setIsSignUp(true)}
+                      className="text-white font-bold cursor-pointer hover:underline"
+                    >
+                      Sign Up
+                    </span>
+                  </div>
+                </form>
+              )
             ) : (
               // Sign Up Form
               <div className="space-y-4">
@@ -472,16 +581,24 @@ const checkUser=async ()=>{
                 />
                 
               
-                <div className="text-xs text-white/80 mt-4">
-                  By clicking Sign Up, you agree to our{' '}
-                  <a href="#" className="text-white hover:underline">Terms</a>,{' '}
-                  <a href="#" className="text-white hover:underline">Data Policy</a> and{' '}
-                  <a href="#" className="text-white hover:underline">Cookie Policy</a>.
-                </div>
-                
                 <button  onClick={handleSendOtp} className="w-full p-4 bg-white text-blue-700 font-bold rounded-lg hover:bg-gray-100 transform hover:-translate-y-1 transition-all duration-300 shadow-lg mt-4">
                   Sign Up
                 </button>
+                
+                <div className="mt-4">
+                  <div className="flex items-center justify-center space-x-3">
+                    <GoogleLogin
+                      text="signup_with"
+                      onSuccess={(res) => {
+                        let x = jwtDecode(res?.credential);
+                        handleGoogleLogin(x);
+                      }}
+                      onError={(err) => {
+                        // console.log(err, "Signup Failed");
+                      }}
+                    />
+                  </div>
+                </div>
                 
                 <div className="text-center mt-4 text-white/80">
                   Already have an account?{' '}
