@@ -93,7 +93,7 @@ const  ChatContainer = () =>{
     },[selectedUser._id, socket, getMessages, subscribeToMessages, unsubscribeFromMessages]);
 
     if(isMessagesLoading) return (
-        <div className="flex-1 flex flex-col overflow-auto">
+        <div className="h-full flex flex-col overflow-hidden">
             <ChatHeader />
             <MessageSkeleton />
             <MessageInput />    
@@ -109,7 +109,7 @@ const  ChatContainer = () =>{
 
 
     return (
-        <div className="flex-1 flex flex-col overflow-auto">
+        <div className="h-full flex flex-col overflow-hidden">
   <ChatHeader />
 
   <div className="flex-1 overflow-y-auto p-4 space-y-4">

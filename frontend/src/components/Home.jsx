@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import Navbar from "./Navbar";
 import Dashboard from "./Dashboard";
 import SuggestionsSidebar from "./Suggestions.jsx";
+import AppLayout from "./AppLayout";
 import { toast } from "react-hot-toast";
 import PostsComponent from "./Posts";
 import Quote from "./Quote.jsx";
@@ -261,57 +262,11 @@ const fetchUserDetails = async () => {
   }
 
   return (
-    <div style={styles.container}>
-      {/* Navbar */}
-      <div style={styles.navbar}>
-        <Navbar username={currentuser.username} profilePic={currentuser.profilePic} />
+    <AppLayout>
+      <div className="w-full flex justify-center py-4 px-2 sm:px-4">
+        <PostsComponent />
       </div>
-
-      {/* Main content */}
-      <section style={styles.content}>
-        {/* Dashboard Sidebar */}
-        <div style={{ ...styles.dashboard, width: getSidebarWidth() }}>
-          <Dashboard />
-        </div>
-
-        {/* Posts Section */}
-        <div
-          style={{
-            ...styles.posts,
-            marginRight: isSidebarVisible ? "0" : "5%", // Adjust space when sidebar is hidden
-          }}
-        >
-          <PostsComponent />
-        </div>
-
-        {/* Suggestions Sidebar */}
-        {/* <div
-          style={{
-            ...styles.suggestionsSidebar,
-            width: isSidebarVisible ? getSidebarWidth() : "0", // Smoothly hide sidebar
-            transition: "width 0.3s ease-in-out",
-            overflow: isSidebarVisible ? "auto" : "hidden", // Prevent overflow when hidden
-            zIndex: isSidebarVisible && window.innerWidth < 900 ? 1000 : "auto", // For smaller screens, overlay suggestions
-          }}
-        >
-          {isSidebarVisible && (
-            <>
-              <button style={styles.closeButton} onClick={toggleSidebar}>
-                ✕
-              </button>
-              <SuggestionsSidebar />
-            </>
-          )}
-        </div>
-
-       
-        {!isSidebarVisible && (
-          <button style={styles.openButton} onClick={toggleSidebar}>
-            ☰
-          </button>
-        )} */}
-      </section>
-    </div>
+    </AppLayout>
   );
 };
 

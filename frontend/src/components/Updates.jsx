@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import api from '../api/api';
 import { useNavigate } from 'react-router-dom';
+import AppLayout from './AppLayout';
 
 import { AuthContext } from "./AuthContext";
 
@@ -273,214 +274,169 @@ export default function Updates() {
 
 
   return (
-    <div className="bg-[#d8dfea] min-h-screen">
-      {/* <div className="bg-[#3b5998] text-white p-3">
-        <h1 className="text-xl font-bold">friendsbook</h1>
-      </div> */}
-
-<div className="bg-[#3B5998] text-white p-4 flex items-center justify-between shadow-md">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="text-white font-medium text-md hover:bg-[#1d325e] px-3 py-1 rounded-md flex items-center gap-2 transition duration-200"
-            title="Go Back"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </button>
-          <div className="text-xl font-bold">friendsbook</div>
-        </div>
-        <div className="flex space-x-4">
-      
-        </div>
-      </div>
-
-      <div className="max-w-2xl mx-auto bg-white border border-gray-300 mt-2 p-5">
-        <div className="border-b border-gray-300 flex space-x-5 mb-5">
-
-        <button
-            className={`p-2 ${activeTab === 'friends' ? 'border-b-2 border-gray-500' : ''}`}
-            onClick={() => setActiveTab('friends')}
-          >
-            Friends
-          </button>
-
-          {/* <button
-            className={`p-2 ${activeTab === 'requests' ? 'border-b-2 border-gray-500' : ''}`}
-            onClick={() => setActiveTab('requests')}
-          >
-            Friend Requests ({followRequests.length})
-          </button> */}
+    <AppLayout>
+      <div className="w-full flex justify-center py-4 px-2 sm:px-4">
+        <div className="w-full max-w-2xl bg-white border border-gray-200 p-5 shadow-md rounded-lg">
+          <div className="border-b border-gray-300 flex space-x-5 mb-5">
 
           <button
-            className={`p-2 ${activeTab === 'people' ? 'border-b-2 border-gray-500' : ''}`}
-            onClick={() => setActiveTab('people')}
-          >
-            People You May Know
-          </button>
+              className={`p-2 ${activeTab === 'friends' ? 'border-b-2 border-gray-500 font-semibold' : ''}`}
+              onClick={() => setActiveTab('friends')}
+            >
+              Friends
+            </button>
 
-          <button
-            className={`p-2 ${activeTab === 'search' ? 'border-b-2 border-gray-500' : ''}`}
-            onClick={() => setActiveTab('search')}
-          >
-            Search
-          </button>
-        </div>
+            <button
+              className={`p-2 ${activeTab === 'people' ? 'border-b-2 border-gray-500 font-semibold' : ''}`}
+              onClick={() => setActiveTab('people')}
+            >
+              People You May Know
+            </button>
 
-        {activeTab === 'requests' && (
-  <div>
-    {followRequests.length > 0 ? (
-      followRequests.map((notif, index) => (
-        <div key={index} className="border border-gray-300 p-4 flex items-center mb-3">
-          <div className="w-16 h-16 bg-gray-200 flex items-center justify-center border mr-4">
-            <img 
-              src={notif.senderId.profilePic} 
-              alt="profile" 
-              className="w-full h-full object-cover"
-            />
+            <button
+              className={`p-2 ${activeTab === 'search' ? 'border-b-2 border-gray-500 font-semibold' : ''}`}
+              onClick={() => setActiveTab('search')}
+            >
+              Search
+            </button>
           </div>
-          <div className="flex-1">
-            <h3 className="font-bold">{notif.senderId.fullname}</h3>
-            <p className="text-sm text-gray-500">{notif.title}</p>
-            <div className="mt-2 flex space-x-2">
-              <button 
-                onClick={() => handleFollowUnfollow(notif.senderId._id, 'follow', notif._id)}
-                className="bg-blue-600 text-white text-sm px-3 py-1 rounded">
-                Confirm
-              </button>
-              <button 
-                onClick={() => handleDelete(notif._id)}
-                className="bg-gray-200 text-sm px-3 py-1 rounded">
-                Not Now
-              </button>
+
+          {activeTab === 'requests' && (
+            <div>
+              {followRequests.length > 0 ? (
+                followRequests.map((notif, index) => (
+                  <div key={index} className="border border-gray-300 p-4 flex items-center mb-3">
+                    <div className="w-16 h-16 bg-gray-200 flex items-center justify-center border mr-4">
+                      <img 
+                        src={notif.senderId.profilePic} 
+                        alt="profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold">{notif.senderId.fullname}</h3>
+                      <p className="text-sm text-gray-500">{notif.title}</p>
+                      <div className="mt-2 flex space-x-2">
+                        <button 
+                          onClick={() => handleFollowUnfollow(notif.senderId._id, 'follow', notif._id)}
+                          className="bg-blue-600 text-white text-sm px-3 py-1 rounded">
+                          Confirm
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(notif._id)}
+                          className="bg-gray-200 text-sm px-3 py-1 rounded">
+                          Not Now
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p>No follow requests</p>
+              )}
             </div>
-          </div>
+          )}
+
+          {activeTab === 'search' && (
+            <div>
+              <input
+                type="text"
+                placeholder="Search for people..."
+                className="border w-full p-2 rounded mb-4 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              {suggestedUsers.map(user => (
+                <div key={user._id} className="border border-gray-200 p-4 flex items-center mb-3 rounded-lg hover:shadow-sm transition-shadow">
+                  <div className="w-16 h-16 bg-gray-200 flex items-center justify-center border mr-4 rounded-md overflow-hidden">
+                    <img 
+                      src={user.profilePic} 
+                      alt="profile" 
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={() => goToUserProfile(user._id)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold">{user.username}</h3>
+                    <div className="mt-2 flex space-x-2">
+                      <button
+                        onClick={() => handleFollowUnfollow(user._id, user.followStatus === 'follow' ? 'follow' : 'unfollow')}
+                        className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700 transition-colors">
+                        {user.followStatus === 'follow' ? 'Follow' : 'Unfollow'}
+                      </button>
+                      <button
+                        onClick={() => handleChat(user._id)}
+                        className="bg-yellow-500 text-white text-sm px-3 py-1 rounded hover:bg-yellow-600 transition-colors">
+                        Chat
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'people' && (
+            <div>
+              {allSuggestedUsers.map(user => (
+                <div key={user._id} className="border border-gray-200 p-4 flex items-center mb-3 rounded-lg hover:shadow-sm transition-shadow">
+                  <div className="w-16 h-16 bg-gray-200 flex items-center justify-center border mr-4 rounded-md overflow-hidden">
+                    <img 
+                      src={user.profilePic} 
+                      alt="profile" 
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={() => goToUserProfile(user._id)}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold">{user.username}</h3>
+                    <div className="mt-2 flex space-x-2">
+                      <button
+                        onClick={() => handleFollowUnfollow(user._id, user.followStatus === 'follow' ? 'follow' : 'unfollow')}
+                        className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700 transition-colors">
+                        {user.followStatus === 'follow' ? 'Follow' : 'Unfollow'}
+                      </button>
+                      <button
+                        onClick={() => handleChat(user._id)}
+                        className="bg-yellow-500 text-white text-sm px-3 py-1 rounded hover:bg-yellow-600 transition-colors">
+                        Chat
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'friends' && (
+            <div>
+              {friends.map(user => (
+                <div key={user._id} className="border border-gray-200 p-4 flex items-center mb-3 rounded-lg hover:shadow-sm transition-shadow">
+                  <div className="w-16 h-16 bg-gray-200 flex items-center justify-center border mr-4 rounded-md overflow-hidden">
+                    <img 
+                      src={user.profilePic} 
+                      alt="profile" 
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={() => goToUserProfile(user._id)}
+                    />
+                  </div>
+                  <div className="flex-grow">
+                    <h3 className="font-bold">{user.username}</h3>
+                    <div className="mt-2 flex space-x-2">
+                      <button
+                        onClick={() => handleChat(user._id)}
+                        className="bg-yellow-500 text-white text-sm px-3 py-1 rounded hover:bg-yellow-600 transition-colors">
+                        Chat
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      ))
-    ) : (
-      <p>No follow requests</p>
-    )}
-  </div>
-)}
-
-
-
-        {activeTab === 'search' && (
-          <div>
-            <input
-              type="text"
-              placeholder="Search for people..."
-              className="border w-full p-2 rounded mb-4"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            {suggestedUsers.map(user => (
-              <div key={user._id} className="border border-gray-300 p-4 flex items-center mb-3">
-                <div className="w-16 h-16 bg-gray-200 flex items-center justify-center border mr-4">
-                  <img 
-                    src={user.profilePic} 
-                    alt="profile" 
-                    className="w-full h-full object-cover cursor-pointer"
-
-                    onClick={() => goToUserProfile(user._id)}
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold">{user.username}</h3>
-                  <div className="mt-2 flex space-x-2">
-                    <button
-                      onClick={() => handleFollowUnfollow(user._id, user.followStatus === 'follow' ? 'follow' : 'unfollow')}
-                      className="bg-blue-600 text-white text-sm px-3 py-1 rounded">
-                      {user.followStatus === 'follow' ? 'Follow' : 'Unfollow'}
-                    </button>
-                    <button
-                      onClick={() => handleChat(user._id)}
-                      className="bg-yellow-500 text-white text-sm px-3 py-1 rounded">
-                      Chat
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-
-        {activeTab === 'people' && (
-          <div>
-         
-            {allSuggestedUsers.map(user => (
-              <div key={user._id} className="border border-gray-300 p-4 flex items-center mb-3">
-                <div className="w-16 h-16 bg-gray-200 flex items-center justify-center border mr-4">
-                  <img 
-                    src={user.profilePic} 
-                    alt="profile" 
-                    className="w-full h-full object-cover cursor-pointer"
-
-                    onClick={() => goToUserProfile(user._id)}
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold">{user.username}</h3>
-                  <div className="mt-2 flex space-x-2">
-                    <button
-                      onClick={() => handleFollowUnfollow(user._id, user.followStatus === 'follow' ? 'follow' : 'unfollow')}
-                      className="bg-blue-600 text-white text-sm px-3 py-1 rounded">
-                      {user.followStatus === 'follow' ? 'Follow' : 'Unfollow'}
-                    </button>
-                    <button
-                      onClick={() => handleChat(user._id)}
-                      className="bg-yellow-500 text-white text-sm px-3 py-1 rounded">
-                      Chat
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-
-{activeTab === 'friends' && (
-          <div>
-         
-            {friends.map(user => (
-              <div key={user._id} className="border border-gray-300 p-4 flex items-center mb-3">
-                <div className="w-16 h-16 bg-gray-200 flex items-center justify-center border mr-4">
-                  <img 
-                    src={user.profilePic} 
-                    alt="profile" 
-                    className="w-full h-full object-cover cursor-pointer"
-
-                    onClick={() => goToUserProfile(user._id)}
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold">{user.username}</h3>
-                  <div className="mt-2 flex space-x-2">
-                  
-                    <button
-                      onClick={() => handleChat(user._id)}
-                      className="bg-yellow-500 text-white text-sm px-3 py-1 rounded">
-                      Chat
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        
-
-        
-
-
-
-
-
       </div>
-    </div>
+    </AppLayout>
   );
 }
+

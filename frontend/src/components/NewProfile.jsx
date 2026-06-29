@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FiLogOut, FiEdit2, FiMail, FiPhone, FiGlobe, FiMapPin, FiCalendar, FiHeart, FiBook, FiHome } from "react-icons/fi";
 import { AuthContext } from "./AuthContext";
 import api from "../api/api";
+import AppLayout from "./AppLayout";
 
 // ── Constellation Banner ──────────────────────────────────────────────────────
 const ConstellationBanner = ({ seed = "user" }) => {
@@ -274,14 +275,9 @@ const Profile = () => {
   const gridData = renderGridData();
 
   return (
-    <div className="np-page">
-      {/* Back Button */}
-      <button className="np-back-btn" onClick={() => navigate("/home")}>
-        <FiLogOut size={18} style={{ transform: "scaleX(-1)" }} />
-        <span>Home</span>
-      </button>
-
-      <div className="np-profile-wrapper">
+    <AppLayout>
+      <div className="np-page">
+        <div className="np-profile-wrapper">
         {/* ── Cover + Avatar Header ── */}
         <div className="np-cover-section">
           <ConstellationBanner seed={userData.username || "friendsbook"} />
@@ -527,7 +523,8 @@ const Profile = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

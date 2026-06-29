@@ -5,6 +5,7 @@ import {useNavigate} from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { AuthContext } from "./AuthContext";
+import AppLayout from "./AppLayout";
 
 export default function Key() {
 
@@ -196,40 +197,14 @@ useEffect(()=>{
 
 
   return (
-
-    <div className="min-h-screen w-full bg-gray-100 ">
-
-      {/* Header */}
-      <header className="bg-[#3b5998] p-3 shadow-md">
-  <div className="mx-auto flex justify-between items-center px-4">
-    {/* Left Side: Back Button + Key Page Label */}
-    <div className="flex items-center gap-6">
-      <button
-        onClick={() => navigate(-1)}
-        className="text-white font-medium text-md hover:bg-[#1d325e] px-3 py-1 rounded-md flex items-center gap-2"
-      >
-        <FontAwesomeIcon icon={faArrowLeft} size="lg" />
-        {/* Back */}
-      </button>
-      <span className="text-white text-lg font-semibold">Key Page</span>
-    </div>
-
-    {/* Right Side: Removed User Info as requested */}
-    <div className="flex items-center">
-    </div>
-  </div>
-</header>
-
-
-      
-      {/* Main Content */}
-      <div className="w-full py-5">
-        <div className="bg-gray-100 rounded-lg shadow p-6 max-w-4xl mx-auto">
+    <AppLayout>
+      <div className="w-full py-5 px-2 sm:px-4">
+        <div className="bg-white rounded-lg shadow p-6 max-w-4xl mx-auto border border-gray-200">
           <h1 className="text-2xl font-semibold mb-5 pb-4 border-b border-gray-200">Privacy & Security</h1>
           
           {/* Active Key Section */}
           {keyState.activeSection && (
-            <div className="bg-white border border-gray-200 rounded-lg p-5 mb-5">
+            <div className="bg-white border border-gray-250 rounded-lg p-5 mb-5">
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 mr-3">
@@ -253,7 +228,6 @@ useEffect(()=>{
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="text-gray-500">Last Modified</span>
-                  {/* <span className="font-medium">{userData.friendsbookKey.lastModified}</span> */}
 
                   <span className="font-medium">
                     {userData?.friendsbookKey?.lastModified 
@@ -281,7 +255,7 @@ useEffect(()=>{
                 >
                   Deactivate Key
                 </button>
-                <button className="bg-gray-200 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded-md font-medium" onClick={changeKey}>
+                <button className="bg-gray-250 hover:bg-gray-300 text-gray-900 px-4 py-2 rounded-md font-medium" onClick={changeKey}>
                   Change Key
                 </button>
               </div>
@@ -290,7 +264,7 @@ useEffect(()=>{
           
           {/* Inactive Key Section */}
           {keyState.inactiveSection && (
-            <div className="bg-white border border-gray-200 rounded-lg p-5 mb-5">
+            <div className="bg-white border border-gray-250 rounded-lg p-5 mb-5">
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 mr-3">
@@ -308,7 +282,7 @@ useEffect(()=>{
               </p>
               
               <div className="bg-gray-50 rounded-lg p-4 mb-5">
-                <div className="flex justify-between py-2 border-b border-gray-200">
+                <div className="flex justify-between py-2 border-b border-gray-205">
                   <span className="text-gray-500">Status</span>
                   <span className="font-medium">Inactive</span>
                 </div>
@@ -331,7 +305,7 @@ useEffect(()=>{
           
           {/* Create Key Section */}
           {keyState.createKeySection && (
-            <div className="bg-white border border-gray-200 rounded-lg p-5 mb-5">
+            <div className="bg-white border border-gray-250 rounded-lg p-5 mb-5">
               <div className="flex justify-between items-center mb-4">
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 mr-3">
@@ -355,7 +329,7 @@ useEffect(()=>{
                     maxLength={6}
                     value={keyInputs.createKey}
                     onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-200 rounded-md text-base"
+                    className="w-full p-2 border border-gray-250 rounded-md text-base"
                   />
                 </div>
                 <div className="mb-3">
@@ -367,7 +341,7 @@ useEffect(()=>{
                     maxLength={6}
                     value={keyInputs.confirmKey}
                     onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-200 rounded-md text-base"
+                    className="w-full p-2 border border-gray-255 rounded-md text-base"
                   />
                 </div>
                 <div className="text-sm text-gray-500 mt-1">
@@ -415,14 +389,14 @@ useEffect(()=>{
           
           {/* Info Cards */}
           <div className="flex flex-col md:flex-row gap-5 mt-8">
-            <div className="bg-white border border-gray-200 rounded-lg p-5 md:w-1/2">
+            <div className="bg-white border border-gray-250 rounded-lg p-5 md:w-1/2">
               <div className="text-base font-bold mb-2">How Friendsbook Key Works</div>
               <div className="text-gray-500 text-sm">
                 <p className="mb-2">When activated, you'll be asked to enter your 6-character key every time you sign in, even if your email and password are correct.</p>
                 <p>This means that even if someone gets your password, they still can't access your account without your personal key.</p>
               </div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-5 md:w-1/2">
+            <div className="bg-white border border-gray-250 rounded-lg p-5 md:w-1/2">
               <div className="text-base font-bold mb-2">Keep Your Key Safe</div>
               <div className="text-gray-500 text-sm">
                 <p className="mb-2">Your key should be memorable but not easy to guess. Don't share it with anyone, and make sure to set up recovery options in case you forget it.</p>
@@ -436,6 +410,6 @@ useEffect(()=>{
           <p>© 2025 Friendsbook · Privacy · Terms · Cookies</p>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
-}
+}

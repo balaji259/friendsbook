@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { AuthContext } from "./AuthContext";
+import AppLayout from "./AppLayout";
 
 const NewFeedbackForm = () => {
   const [feedbackType, setFeedbackType] = useState("");
@@ -64,104 +65,62 @@ const handleSubmit = async (e) => {
 
 
   return (
+    <AppLayout>
+      <div className="w-full flex justify-center py-6 px-2 sm:px-4">
+        <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg border border-gray-200">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Send Feedback</h2>
+          <p className="text-gray-600 text-sm mb-6">
+            We’re always working to improve Friendsbook and your feedback helps us make it better
+            for everyone. Let us know what’s working and what isn’t.
+          </p>
 
-
-    <div className="min-h-screen bg-gray-200">
-    {/* Navbar */}
-    <nav className="bg-[#3B5998] text-white p-4 flex items-center justify-between shadow-md">
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={() => navigate(-1)} 
-          className="text-white font-medium text-md hover:bg-[#1d325e] px-3 py-1 rounded-md flex items-center gap-2 transition duration-200"
-          title="Go Back"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-        </button>
-        <div className="text-xl font-bold">friendsbook</div>
-      </div>
-    </nav>
-
-
-    <div className="flex items-center justify-center min-h-screen bg-gray-200">
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg">
-        <h2 className="text-2xl font-semibold mb-4">Send Feedback</h2>
-        <p className="text-gray-600 text-sm mb-4">
-          We’re always working to improve Friendsbook and your feedback helps us make it better
-          for everyone. Let us know what’s working and what isn’t.
-        </p>
-        
-
-        <form onSubmit={handleSubmit}>
-          <label className="block text-sm font-medium text-gray-700">What kind of feedback do you have?</label>
-          <select
-            className="w-full p-2 border rounded mt-1 mb-4"
-            value={feedbackType}
-            onChange={(e) => setFeedbackType(e.target.value)}
-          >
-            <option value="">Please select</option>
-            <option value="Suggestion">Suggestion</option>
-            <option value="Something not working">Something isn't working</option>
-            <option value="Compliment">Compliment</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <label className="block text-sm font-medium text-gray-700">Which part of Friendsbook are you giving feedback on?</label>
-          <select
-            className="w-full p-2 border rounded mt-1 mb-4"
-            value={feedbackPart}
-            onChange={(e) => setFeedbackPart(e.target.value)}
-          >
-            <option value="">Please select</option>
-            <option value="Feed">Feed</option>
-            <option value="Profile">Profile</option>
-            <option value="Friends">Friends</option>
-            <option value="Chats">Chats</option>
-            <option value="Key">Key</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <label className="block text-sm font-medium text-gray-700">Your feedback:</label>
-          <textarea
-            className="w-full p-2 border rounded mt-1 mb-4"
-            placeholder="Please describe your feedback in detail..."
-            value={feedbackText}
-            onChange={(e) => setFeedbackText(e.target.value)}
-          ></textarea>
-
-          {/* <div className="flex items-center mb-4">
-            <input
-              type="checkbox"
-              className="mr-2"
-              checked={includeSessionData}
-              onChange={() => setIncludeSessionData(!includeSessionData)}
-              />
-            <span className="text-sm text-gray-700">Include data about your current session to help us understand your feedback better (optional)</span>
-          </div> */}
-
-      
-
-          <button
-            type="submit"
-            className="w-full bg-[#3b5998] text-white p-2 rounded hover:bg-blue-700 mb-4"
+          <form onSubmit={handleSubmit}>
+            <label className="block text-sm font-medium text-gray-700">What kind of feedback do you have?</label>
+            <select
+              className="w-full p-2 border rounded mt-1 mb-4 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              value={feedbackType}
+              onChange={(e) => setFeedbackType(e.target.value)}
             >
-            Submit Feedback
-          </button>
-      
-              {/* {responseMessage && (
-                <div
-                  className={`p-3 text-center rounded-lg mb-4 ${
-                    isError ? "bg-red-200 text-red-800" : "bg-green-200 text-green-800"
-                  }`}
-                >
-                  {responseMessage}
-                </div>
-              )} */}
-        </form>
+              <option value="">Please select</option>
+              <option value="Suggestion">Suggestion</option>
+              <option value="Something not working">Something isn't working</option>
+              <option value="Compliment">Compliment</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <label className="block text-sm font-medium text-gray-700">Which part of Friendsbook are you giving feedback on?</label>
+            <select
+              className="w-full p-2 border rounded mt-1 mb-4 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+              value={feedbackPart}
+              onChange={(e) => setFeedbackPart(e.target.value)}
+            >
+              <option value="">Please select</option>
+              <option value="Feed">Feed</option>
+              <option value="Profile">Profile</option>
+              <option value="Friends">Friends</option>
+              <option value="Chats">Chats</option>
+              <option value="Key">Key</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <label className="block text-sm font-medium text-gray-700">Your feedback:</label>
+            <textarea
+              className="w-full p-2 border rounded mt-1 mb-4 focus:ring-1 focus:ring-blue-500 focus:outline-none h-32"
+              placeholder="Please describe your feedback in detail..."
+              value={feedbackText}
+              onChange={(e) => setFeedbackText(e.target.value)}
+            ></textarea>
+
+            <button
+              type="submit"
+              className="w-full bg-[#3b5998] text-white p-2.5 rounded hover:bg-blue-700 font-medium transition-colors"
+            >
+              Submit Feedback
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
-    </div>
+    </AppLayout>
   );
 };
 

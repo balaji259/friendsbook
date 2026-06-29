@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import "./details.css";
+import AppLayout from "./AppLayout";
 
 const UserProfile = () => {
     const { userId } = useParams(); // Get userId from the URL
@@ -161,7 +162,8 @@ const UserProfile = () => {
     if (!userData) return <p>Loading...</p>;
 
     return (
-        <div className="container">
+        <AppLayout>
+            <div className="container">
             <div className="profileCard">
                 {/* Left Section: Profile Picture */}
                 <div className="profilePicContainer">
@@ -339,6 +341,7 @@ const UserProfile = () => {
 
      
         </div>
+        </AppLayout>
     );
 };
 

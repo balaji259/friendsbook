@@ -6,6 +6,7 @@ import { FiLogOut, FiMail, FiPhone, FiGlobe, FiMapPin, FiCalendar, FiHeart, FiBo
 // BUG FIX #5: import the project's api instance instead of raw axios
 import api from "../api/api";
 import { useChatStore } from "./useChatStore";
+import AppLayout from "./AppLayout";
 
 const InfoRow = ({ icon, label, value }) => {
   if (!value) return null;
@@ -335,14 +336,9 @@ const OtherProfile = () => {
   }
 
   return (
-    <div className="np-page">
-      {/* Back Button */}
-      <button className="np-back-btn" onClick={goToHome}>
-        <FiLogOut size={18} style={{ transform: "scaleX(-1)" }} />
-        <span>Home</span>
-      </button>
-
-      <div className="np-profile-wrapper">
+    <AppLayout>
+      <div className="np-page">
+        <div className="np-profile-wrapper">
         {/* ── Cover + Avatar Header ── */}
         <div className="np-cover-section">
           <ConstellationBanner seed={userData.username || "friendsbook"} />
@@ -610,7 +606,8 @@ const OtherProfile = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 
