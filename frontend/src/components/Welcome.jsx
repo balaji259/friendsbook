@@ -60,7 +60,7 @@ const WelcomeOverlay = () => {
     }
 
     function onLogin() {
-        navigate('/login');
+        navigate('/');
     }
 
   const checkUser=async ()=>{

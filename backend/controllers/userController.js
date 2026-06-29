@@ -232,9 +232,10 @@ const getSearchSuggestions = async(req,res) => {
             .select('_id username fullname profilePic bio')
             .lean();
 
+        const followingIds = (loggedInUser.following || []).map(id => id.toString());
         const usersWithFollowStatus = users.map(user => ({
             ...user,
-            followStatus: loggedInUser.following.includes(user._id) ? 'unfollow' : 'follow'
+            followStatus: followingIds.includes(user._id.toString()) ? 'unfollow' : 'follow'
         }));
 
         res.status(200).json({ users: usersWithFollowStatus });

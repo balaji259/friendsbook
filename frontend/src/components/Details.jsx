@@ -103,11 +103,9 @@ function UserDetails() {
 
     const handleUnsavePost = async (postId) => {
         try {
-            console.log("handledeletepost fucntion");
-          const response = await fetch(`/profile/deleteSavedPost/${postId}`, {
-            method: "DELETE",
-          });
-          if (response.ok) {
+            console.log("handledeletepost function");
+          const response = await axios.delete(`/profile/deleteSavedPost/${postId}`);
+          if (response.status === 200) {
             // Update the saved posts list
             setSavedData((prevData) => prevData.filter((post) => post._id !== postId));
 

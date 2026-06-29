@@ -170,7 +170,7 @@ const Profile = () => {
   const fetchUserData = async () => {
     try {
       if (!token) {
-        navigate("/login");
+        navigate("/");
         return;
       }
       const response = await api.get("/profile/me", {

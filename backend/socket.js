@@ -123,4 +123,13 @@ io.on("connection", (socket) => {
   });
 });
 
-module.exports = { io, app, server, getReceiverSocketId };
+function sendNotification(userId, notification) {
+  const receiverSocketIds = getReceiverSocketId(userId);
+  if (receiverSocketIds.length > 0) {
+    receiverSocketIds.forEach(socketId => {
+      io.to(socketId).emit("receive-notification", notification);
+    });
+  }
+}
+
+module.exports = { io, app, server, getReceiverSocketId, sendNotification };

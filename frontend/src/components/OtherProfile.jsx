@@ -65,12 +65,12 @@ const OtherProfile = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login");
+      navigate("/");
       return;
     }
     const payload = parseJwt(token);
     if (!payload?.userId) {
-      navigate("/login");
+      navigate("/");
       return;
     }
     setCurrentUserId(payload.userId);
@@ -155,6 +155,20 @@ const OtherProfile = () => {
         await api.post(`/profile/follow/${profileId}/${currentUserId}`);
         setIsFollowing(true);
         setUserData((prev) => ({ ...prev, followers: [...prev.followers, currentUserId] }));
+        
+        // Send follow notification (if not self)
+        if (profileId !== currentUserId) {
+          try {
+            await api.post("/notifications/create", {
+              userId: profileId,
+              senderId: currentUserId,
+              type: "Follow Notification",
+              body: "started following you"
+            });
+          } catch (err) {
+            console.error("Error sending follow notification:", err);
+          }
+        }
       }
     } catch (err) {
       console.error("Error updating follow status:", err);
@@ -165,7 +179,7 @@ const OtherProfile = () => {
 
   const startChat = () => {
     setChatUserId(profileId);
-    navigate("/chat");
+    navigate("/chats");
   };
 
   const goToHome = () => {

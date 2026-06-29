@@ -209,57 +209,8 @@ export default function Updates() {
 
     setProfileId(id);
 
-    notify(userId,profileId);
     
   };
-
-  const notify = async (userId,profileId) =>{
-    try{
-    
-
-      const token=localStorage.getItem('token');
-      if(!token){
-        toast.error('Please login again !');
-        navigate('/')
-      }
-    
- 
-    if(profileId && userId){
-      if(profileId != userId){
-     
-        await api.post(
-          "/send-notification",
-          {
-            userId: profileId, // The owner of the post
-            senderId: userId, // The person who commented
-            type: "Profile View Notification",
-            title: "Profile View",
-            body: "Viewed Your Profile", // Send the comment text as notification body
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-     
-        console.log("✅ View Notification Sent Successfully");
-      
-      }
-
-
-  
-      }
-    }
-    
-  catch(e){
-    toast.error("Something went wrong !");
-  
-    console.log(e);
-  }
-
-  }
 
    
 
@@ -274,7 +225,6 @@ export default function Updates() {
     if(profileId!=null){
 
       
-      notify(userId,profileId);
       navigate(profileId === userId ? `/profile` : `/other`);
     }
 

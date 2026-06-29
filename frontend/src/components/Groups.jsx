@@ -13,7 +13,7 @@ const Groups = () => {
   const token=localStorage.getItem('token');
   if(!token){
     alert('Login to access the page!');
-    navigate('/login');
+    navigate('/');
   }
   const decoded=jwtDecode(token);
   const userId=decoded.userId;

@@ -522,28 +522,19 @@ const PostComponent = () => {
     )
   );
 
-  // ✅ Send notification only if post was liked (not unliked)
-  if (data.liked === true) {
-    // console.log("inside if - sending notification");
-
-    // await axios.post(
-    //   "/send-notification",
-    //   {
-    //     userId: postCreatorId, // The owner of the post
-    //     senderId: userId,      // The person who liked the post
-    //     type: "Like Notification",
-    //     title: "New Like",
-    //     body: "liked your post"
-    //   },
-    //   {
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${token}`
-    //     }
-    //   }
-    // );
-
-    // console.log("✅ Notification Sent Successfully");
+  // ✅ Send notification only if post was liked (not unliked) and is not the creator's own action
+  if (data.liked === true && postCreatorId !== authuser.userId) {
+    try {
+      await api.post("/notifications/create", {
+        userId: postCreatorId,
+        senderId: authuser.userId,
+        type: "Like Notification",
+        body: "liked your post"
+      });
+      console.log("✅ Like Notification Sent Successfully");
+    } catch (err) {
+      console.error("Error sending like notification:", err);
+    }
   }
 
 } catch (error) {
@@ -657,25 +648,20 @@ setPosts((prevPosts) => {
   await fetchPosts();
   setNewComment('');
 
-  // 2️⃣ Second API Call: Send Notification to Post Owner
-  // await axios.post(
-  //   "/send-notification",
-  //   {
-  //     userId: postCreatorId, // The owner of the post
-  //     senderId: userId,      // The person who commented
-  //     type: "Comment Notification",
-  //     title: "New Comment",
-  //     body: "Commented on Your Post",
-  //   },
-  //   {
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${token}`,
-  //     }
-  //   }
-  // );
-
-  // console.log("✅ Notification Sent Successfully");
+  // 2️⃣ Second API Call: Send Notification to Post Owner (if not the creator's own action)
+  if (postCreatorId !== authuser.userId) {
+    try {
+      await api.post("/notifications/create", {
+        userId: postCreatorId,
+        senderId: authuser.userId,
+        type: "Comment Notification",
+        body: "commented on your post"
+      });
+      console.log("✅ Comment Notification Sent Successfully");
+    } catch (err) {
+      console.error("Error sending comment notification:", err);
+    }
+  }
 
 } catch (error) {
   console.error("Error adding comment or sending notification:", error);
@@ -793,35 +779,13 @@ const goToUserProfile = (userId) => {
 // },[profileId]);
 
 useEffect(() => {
-  const sendNotification = async () => {
-    if (profileId != null) {
-      if (profileId === authuser.userId) {
-        navigate('/profile');
-      } else {
-        try {
-          await api.post(
-            "/send-notification",
-            {
-              userId: profileId, // The owner of the post
-              senderId: authuser.userId, // The person who commented
-              type: "Profile View Notification",
-              title: "Profile View",
-              body: "Viewed Your Profile", // Send the comment text as notification body
-            }
-          );
-
-          // console.log("✅ View Notification Sent Successfully");
-         
-
-          navigate('/other');
-        } catch (error) {
-          console.error("Error sending notification:", error);
-        }
-      }
+  if (profileId != null) {
+    if (profileId === authuser.userId) {
+      navigate('/profile');
+    } else {
+      navigate('/other');
     }
-  };
-
-  sendNotification(); // Call the async function inside useEffect
+  }
 }, [profileId]);
 
 // const handleMediaChange = (e) => {

@@ -6,21 +6,20 @@ const { evaluateStreak } = require('../utils/streakUtils');
 // Function to get the top 10 users by streak count
 const getTopStreakUsers = async (req, res) => {
   try {
-    const allUsers = await User.find().select('profilePic username streak');
+    const topUsers = await User.find({ "streak.count": { $gt: 0 } })
+      .select('profilePic username streak')
+      .sort({ "streak.count": -1 })
+      .limit(10);
     
-    // Evaluate streaks for everyone so broken ones drop to 0
-    const evaluatedUsers = await Promise.all(allUsers.map(u => evaluateStreak(u)));
+    // Evaluate streaks only for the top 10
+    const evaluatedUsers = await Promise.all(topUsers.map(u => evaluateStreak(u)));
     
-    // Sort descending and grab top 10
-    const topStreakUsers = evaluatedUsers
-      .sort((a, b) => (b.streak?.count || 0) - (a.streak?.count || 0))
-      .slice(0, 10)
-      .map(u => ({
-        _id: u._id,
-        profilePic: u.profilePic,
-        username: u.username,
-        streak: { count: u.streak.count }
-      }));
+    const topStreakUsers = evaluatedUsers.map(u => ({
+      _id: u._id,
+      profilePic: u.profilePic,
+      username: u.username,
+      streak: { count: u.streak.count }
+    }));
 
     res.status(200).json(topStreakUsers);
   } catch (error) {

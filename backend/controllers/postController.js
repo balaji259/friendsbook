@@ -140,7 +140,7 @@ const createPost = async(req,res) => {
 }
 
 const getPosts = async(req,res) =>{
-    const userId = req.user ? req.user._id : null; // Optional authentication check
+    const userId = req.user ? req.user.id : null; // Optional authentication check
 
     try {
         const posts = await Post.find({})
@@ -175,7 +175,7 @@ const getPosts = async(req,res) =>{
                 mediaUrl: post.content.mediaUrl,
             },
             likesCount: post.likes.length,
-            likedByUser: userId ? post.likes.includes(userId) : false,
+            likedByUser: userId ? post.likes.map(id => id.toString()).includes(userId.toString()) : false,
             comments: post.comments.map(comment => formatComment(comment)),
             shares: post.shares,
             createdAt: post.createdAt,
@@ -204,7 +204,7 @@ const likePost = async (req,res) =>{
             }
     
             // Check if the user has already liked the post
-            const userIndex = post.likes.indexOf(userId);
+            const userIndex = post.likes.map(id => id.toString()).indexOf(userId.toString());
     
             if (userIndex === -1) {
                 // User has not liked the post, so add like
@@ -231,7 +231,7 @@ const likePost = async (req,res) =>{
 
 const unlikePost = async(req,res) => {
     const postId = req.params.id;
-        const { userId } = req.user; // User ID from authentication middleware
+    const userId = req.user.id; // User ID from authentication middleware
       
         console.log(postId);
         console.log(userId);
@@ -244,7 +244,7 @@ const unlikePost = async(req,res) => {
           }
       
           // Check if the user has already liked the post
-          const userIndex = post.likes.indexOf(userId);
+          const userIndex = post.likes.map(id => id.toString()).indexOf(userId.toString());
           if (userIndex === -1) {
             return res.status(400).json({ message: 'Post is not liked by the user' });
           }
@@ -344,9 +344,17 @@ const replyComment = async (req,res) => {
 
 const deleteComment  = async (req,res) =>{
     const { commentId } = req.params;
+    const userId = req.user.id;
         console.log("reached backend");
         console.log(commentId);
         try {
+            const comment = await Comment.findById(commentId);
+            if (!comment) {
+                return res.status(404).json({ message: 'Comment not found' });
+            }
+            if (comment.user.toString() !== userId) {
+                return res.status(403).json({ message: 'You are not authorized to delete this comment' });
+            }
             // Find and delete the comment
             const deletedComment = await Comment.findByIdAndDelete(commentId);
             if (!deletedComment) {
@@ -371,16 +379,21 @@ const deleteComment  = async (req,res) =>{
 }
 
 const editComment = async(req,res)=>{
-
-    console.log("1");
-
     const { commentId } = req.params;
-        const { text } = req.body;
+    const { text } = req.body;
+    const userId = req.user.id;
     
         console.log(commentId);
         console.log(req.body);
 
         try {
+            const comment = await Comment.findById(commentId);
+            if (!comment) {
+                return res.status(404).json({ message: 'Comment not found' });
+            }
+            if (comment.user.toString() !== userId) {
+                return res.status(403).json({ message: 'You are not authorized to edit this comment' });
+            }
             const updatedComment = await Comment.findByIdAndUpdate(
                 commentId,
                 { text },
@@ -402,10 +415,17 @@ const editComment = async(req,res)=>{
 
 const deleteReply = async(req,res) =>{
     const { replyId } = req.params;
+    const userId = req.user.id;
     
         try {
             console.log("Deleting reply:", replyId);
-    
+            const reply = await Comment.findById(replyId);
+            if (!reply) {
+                return res.status(404).json({ message: 'Reply not found' });
+            }
+            if (reply.user.toString() !== userId) {
+                return res.status(403).json({ message: 'You are not authorized to delete this reply' });
+            }
             // Find and delete the reply
             const deletedReply = await Comment.findByIdAndDelete(replyId);
             if (!deletedReply) {
@@ -414,8 +434,8 @@ const deleteReply = async(req,res) =>{
     
             // Remove reply reference from the parent comment
             await Comment.updateOne(
-                { replies: { $elemMatch: { replyId } } },
-                { $pull: { replies: { replyId } } }
+                { replies: replyId },
+                { $pull: { replies: replyId } }
             );
     
             console.log("Reply deleted successfully");
@@ -430,8 +450,16 @@ const deleteReply = async(req,res) =>{
 const editReply = async (req,res) =>{
     const {replyId}=req.params;
     const { text } = req.body;
+    const userId = req.user.id;
 
     try {
+        const reply = await Comment.findById(replyId);
+        if (!reply) {
+            return res.status(404).json({ message: 'Reply not found' });
+        }
+        if (reply.user.toString() !== userId) {
+            return res.status(403).json({ message: 'You are not authorized to edit this reply' });
+        }
         const updatedComment = await Comment.findByIdAndUpdate(
             replyId,
             { text },

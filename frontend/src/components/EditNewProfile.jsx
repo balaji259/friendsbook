@@ -26,7 +26,7 @@ const NewProfile = () => {
     try {
       if (!token) {
         // BUG FIX #11: was alert() — replaced with redirect
-        navigate("/login");
+        navigate("/");
         return;
       }
       const response = await api.get(`/profile/me`, {

@@ -28,7 +28,7 @@ const Notifications = () => {
       } 
       catch (err) {
         console.log("Invalid token", err);
-        navigate('/login'); 
+        navigate('/'); 
       }
     }
   
