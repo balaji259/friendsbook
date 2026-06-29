@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./NewProfile.css"; // Shared profile styles
 import { useSocket } from "./useSocket";
@@ -33,6 +33,126 @@ const InterestTag = ({ emoji, label, value }) => {
   );
 };
 
+// ── Constellation Banner ──────────────────────────────────────────────────────
+const ConstellationBanner = ({ seed = "user" }) => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    // Seed a stable random using the username string
+    let seedVal = 0;
+    for (let i = 0; i < seed.length; i++) seedVal += seed.charCodeAt(i);
+    const rng = (() => { let s = seedVal; return () => { s = (s * 9301 + 49297) % 233280; return s / 233280; }; })();
+
+    const W = canvas.width;
+    const H = canvas.height;
+
+    // Color palettes keyed by seed mod
+    const palettes = [
+      { bg: "#0d0d1a", primary: "#6c5ce7", secondary: "#a29bfe", accent: "#fd79a8" },
+      { bg: "#0a1628", primary: "#0984e3", secondary: "#74b9ff", accent: "#00cec9" },
+      { bg: "#0d1a0d", primary: "#00b894", secondary: "#55efc4", accent: "#fdcb6e" },
+      { bg: "#1a0d1a", primary: "#e84393", secondary: "#fd79a8", accent: "#a29bfe" },
+    ];
+    const pal = palettes[seedVal % palettes.length];
+
+    const numParticles = 55;
+    const particles = Array.from({ length: numParticles }, () => ({
+      x: rng() * W,
+      y: rng() * H,
+      vx: (rng() - 0.5) * 0.4,
+      vy: (rng() - 0.5) * 0.4,
+      r: rng() * 2 + 1,
+      opacity: rng() * 0.6 + 0.3,
+    }));
+
+    let animId;
+    const draw = () => {
+      ctx.clearRect(0, 0, W, H);
+
+      // Background
+      ctx.fillStyle = pal.bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // Subtle overlay gradient
+      const grad = ctx.createLinearGradient(0, 0, W, H);
+      grad.addColorStop(0, pal.primary + "33");
+      grad.addColorStop(1, pal.secondary + "22");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, W, H);
+
+      // Move particles
+      particles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = W;
+        if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H;
+        if (p.y > H) p.y = 0;
+      });
+
+      // Draw lines between close particles
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 110) {
+            const alpha = (1 - dist / 110) * 0.35;
+            ctx.beginPath();
+            ctx.strokeStyle = pal.secondary + Math.round(alpha * 255).toString(16).padStart(2, "0");
+            ctx.lineWidth = 0.8;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw particles
+      particles.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = pal.secondary;
+        ctx.globalAlpha = p.opacity;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+
+      // Accent glow orbs (fixed, seeded)
+      const orbs = [
+        { x: W * 0.15, y: H * 0.5, color: pal.primary },
+        { x: W * 0.75, y: H * 0.4, color: pal.accent },
+        { x: W * 0.5, y: H * 0.3, color: pal.secondary },
+      ];
+      orbs.forEach(({ x, y, color }) => {
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, 80);
+        glow.addColorStop(0, color + "44");
+        glow.addColorStop(1, "transparent");
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, W, H);
+      });
+
+      animId = requestAnimationFrame(draw);
+    };
+
+    draw();
+    return () => cancelAnimationFrame(animId);
+  }, [seed]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={1100}
+      height={200}
+      className="np-cover-canvas"
+    />
+  );
+};
+
 const OtherProfile = () => {
   const [userData, setUserData] = useState(null);
   const [currentUserId, setCurrentUserId] = useState(null);
@@ -46,6 +166,7 @@ const OtherProfile = () => {
   // New state for inline posts grid
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [showTextPosts, setShowTextPosts] = useState(false);
 
   const { onlineUsers } = useSocket();
   const { profileId, setProfileId, setChatUserId } = useChatStore();
@@ -224,7 +345,7 @@ const OtherProfile = () => {
       <div className="np-profile-wrapper">
         {/* ── Cover + Avatar Header ── */}
         <div className="np-cover-section">
-          <div className="np-cover-banner" />
+          <ConstellationBanner seed={userData.username || "friendsbook"} />
           <div className="np-avatar-area">
             <div className="np-avatar-container">
               <img
@@ -395,39 +516,61 @@ const OtherProfile = () => {
 
         {/* ── Posts Section ── */}
         <div className="np-tabs-container">
-          <div className="np-tabs">
-            <button className="np-tab active">
-              Posts
+          <div className="np-tabs-row">
+            <div className="np-tabs">
+              <button className="np-tab active">
+                Posts
+              </button>
+            </div>
+            <button
+              className={`np-text-toggle ${showTextPosts ? 'active' : ''}`}
+              onClick={() => setShowTextPosts(prev => !prev)}
+              title={showTextPosts ? "Hide text posts" : "Show text posts"}
+            >
+              {showTextPosts ? "Hide text posts" : "Show text posts"}
             </button>
           </div>
 
           <div className="np-post-grid">
-            {posts.map((post) => (
-              <div
-                key={post._id}
-                className="np-post-cell"
-                onClick={() => setSelectedPost(post)}
-              >
-                {post.postType === "image" && post.content?.mediaUrl && (
-                  <img src={post.content.mediaUrl} alt="Post" className="np-post-media" />
-                )}
-                {post.postType === "video" && post.content?.mediaUrl && (
-                  <video className="np-post-media" muted>
-                    <source src={post.content.mediaUrl} type="video/mp4" />
-                  </video>
-                )}
-                {post.postType === "text" && (
-                  <div className="np-post-text-preview">
-                    <p>{post.caption}</p>
-                  </div>
-                )}
-              </div>
-            ))}
-            {posts.length === 0 && (
-              <div className="np-no-posts">
-                <p>No posts to show here.</p>
-              </div>
-            )}
+            {(() => {
+              const filteredPosts = !showTextPosts
+                ? posts.filter(p => p.postType !== "text")
+                : posts;
+              return (
+                <>
+                  {filteredPosts.map((post, idx) => (
+                    <div
+                      key={post._id}
+                      className="np-post-cell"
+                      onClick={() => setSelectedPost(post)}
+                    >
+                      {post.postType === "image" && post.content?.mediaUrl && (
+                        <img src={post.content.mediaUrl} alt="Post" className="np-post-media" />
+                      )}
+                      {post.postType === "video" && post.content?.mediaUrl && (
+                        <>
+                          <video className="np-post-media" muted>
+                            <source src={post.content.mediaUrl} type="video/mp4" />
+                          </video>
+                          <div className="np-post-video-badge">▶</div>
+                        </>
+                      )}
+                      {post.postType === "text" && (
+                        <div className={`np-post-text-preview np-text-palette-${idx % 5}`}>
+                          <p className="np-text-body">{post.caption?.length > 90 ? post.caption.slice(0, 90) + "…" : post.caption}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {filteredPosts.length === 0 && (
+                    <div className="np-no-posts">
+                      <div className="np-no-posts-icon">📭</div>
+                      <p>{!showTextPosts ? "No media posts yet." : "No posts to show here yet."}</p>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </div>

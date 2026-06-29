@@ -234,87 +234,84 @@ img{
 }
 
 
-/* Small Screens (Mobile Devices) */
+/* Responsive Design for Mobile Devices (under 768px) */
 @media (max-width: 768px) {
   .sidebar {
-    /* width: 18%; */
-    width:125%;
-    padding: 1rem;
+    width: 100% !important;
+    padding: 1.5rem 0.25rem !important;
+    align-items: center !important;
   }
 
   .menu {
-    gap: 0.8rem; /* Reduced gap */
-    display:flex;
-    flex-direction: column;
-    align-items:flex-start;
+    gap: 1.8rem !important;
+    align-items: center !important;
+    width: 100% !important;
   }
 
   .menu-item {
-    font-size: 0.85rem;
-    padding: 0.4rem ;
+    padding: 0.6rem 0 !important;
+    width: 100% !important;
+    justify-content: center !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .menu-item svg {
+    font-size: 1.5rem !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+
+  .menu-text {
+    display: none !important;
+  }
+
+  .logout {
+    margin-top: auto !important;
+    width: 100% !important;
+    justify-content: center !important;
   }
 
   .logout-btn {
-    font-size: 0.85rem;
-    padding: 0.5rem;
-    /* margin-bottom:25px; */
+    width: 100% !important;
+    padding: 0.6rem 0 !important;
+    justify-content: center !important;
   }
 }
 
-/* Very Small Screens (300px Width) */
-@media (max-width: 480px) {
-  .sidebar {
-    width: 100%;
-    padding: 0.5rem; /* Reduced padding */
-  }
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f5f5f5;
+  color: #333;
+  font-family: Arial, sans-serif;
+}
 
-  .menu {
-    gap: 0.8rem; /* Reduced gap */
-    display:flex;
-    flex-direction: column;
-    align-items:flex-start;
-  }
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #ddd;
+  border-top: 5px solid #6c63ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
 
-  .menu-item {
-    font-size: 0.4rem; /* Smaller font for compactness */
-    padding: 0.3rem 0.4rem; /* Compact padding */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
   }
-
-  .logout{
-    display:flex;
-    padding-left: 0px;
-    justify-content: flex-start;
-  }
-
-  .logout-btn {
-    font-size: 0.4rem;
-    padding-left:0px;
-    /* border:2px solid red; */
+  100% {
+    transform: rotate(360deg);
   }
 }
 
-/* Extra Small Screens (Specifically for 300x600) */
-@media (max-width: 320px) {
-  .sidebar {
-    width: 12%; /* Smaller width */
-    padding: 0.4rem;
-  }
-
-  .menu {
-    gap: 0.5rem; /* Even tighter gap */
-  }
-
-  .menu-item {
-    font-size: 0.4rem; /* Further reduce font size */
-    line-height: 1.2; /* Maintain readability */
-    padding: 0.2rem 0.4rem; /* Tight padding */
-    white-space: normal; /* Allow text wrapping instead of overflow */
-    word-break: break-word; /* Break long words if necessary */
-  }
-
-  .logout-btn {
-    font-size: 0.7rem; /* Further reduce font size */
-    padding: 0.3rem 0.5rem; /* Compact padding */
-    margin-top: 0.5rem; /* Reduced margin */
-  }
+.quote {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  color: #6c63ff;
 }

@@ -88,9 +88,8 @@ if(isLoading)
   // };
 
   const getSidebarWidth = () => {
-    if (window.innerWidth < 600) return "11%";
-    if (window.innerWidth < 900) return "15%";
-    return "15%";
+    if (window.innerWidth < 768) return "70px";
+    return "18%";
   };
 
 
