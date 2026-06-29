@@ -131,12 +131,14 @@ const sendCommunityMessage=async (req,res)=>{
 
         await newMessage.save();
 
-        //real time functinlity goes here!
+        //real time functionality goes here!
         console.log("real time msgh event!");
-        const receiverSocketId = getReceiverSocketId(receiverId);
-        if(receiverSocketId){
+        const receiverSocketIds = getReceiverSocketId(receiverId);
+        if (receiverSocketIds.length > 0) {
             console.log("sending the emit event");
-            io.to(receiverSocketId).emit("newCommunityMessage",newMessage);
+            receiverSocketIds.forEach(socketId => {
+                io.to(socketId).emit("newCommunityMessage", newMessage);
+            });
         }
 
 

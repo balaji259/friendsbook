@@ -70,9 +70,9 @@ const Notifications = () => {
       <div className="bg-[#3B5998] text-white p-4 flex items-center justify-between shadow-md">
         <div className="text-xl font-bold">friendsbook</div>
         <div className="flex space-x-4">
-          <p onClick={()=>{navigate('/profile')}} className="text-sm">Profile</p>
-          <p onClick={()=>{navigate('/friends')}} className="text-sm">Find Friends</p>
-          {/* <p  className="text-sm">Account</p> */}
+          <p onClick={()=>{navigate('/home')}} className="text-sm cursor-pointer hover:underline">Home</p>
+          <p onClick={()=>{navigate('/profile')}} className="text-sm cursor-pointer hover:underline">Profile</p>
+          <p onClick={()=>{navigate('/friends')}} className="text-sm cursor-pointer hover:underline">Find Friends</p>
         </div>
       </div>
 

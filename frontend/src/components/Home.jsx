@@ -26,7 +26,8 @@ const Home = () => {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false); 
   const {user,setUser,socket,connectSocket}= useSocket();
   const [isLoading, setIsLoading] = useState(true); 
-    const { token, authuser } = useContext(AuthContext);
+  const { token, authuser } = useContext(AuthContext);
+  const { setProfileId } = useChatStore();
   const navigate=useNavigate();
  
 useEffect(()=>{
@@ -218,10 +219,8 @@ const fetchUserDetails = async () => {
   
   useEffect(()=>{
     // console.log("loading home page!");
+    setProfileId(null);
     getUser();
-    
-
-
   },[]);
 
 

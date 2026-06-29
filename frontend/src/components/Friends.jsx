@@ -7,13 +7,17 @@ import {useSocket} from "./useSocket";
 import api from "../api/api";
 import { AuthContext } from "./AuthContext";
 
+import { useChatStore } from "./useChatStore";
+
 const Friends = () => {
   const { authuser } = useContext(AuthContext);
   const {user,setUser,socket,connectSocket}= useSocket();
   const [isLoading, setIsLoading] = useState(true); 
+  const { setProfileId } = useChatStore();
 
 
   useEffect(() => {
+    setProfileId(null);
     const getUser = async () => {
       try {
         const res = await api.get(`/user/getUser`);

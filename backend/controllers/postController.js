@@ -575,6 +575,16 @@ const deletePost = async (req,res) => {
             return res.status(403).json({ message: 'You are not authorized to delete this post' });
           }
       
+          // Delete associated comments and replies first
+          if (post.comments && post.comments.length > 0) {
+              for (const commentId of post.comments) {
+                  const comment = await Comment.findById(commentId);
+                  if (comment && comment.replies && comment.replies.length > 0) {
+                      await Comment.deleteMany({ _id: { $in: comment.replies } });
+                  }
+              }
+              await Comment.deleteMany({ _id: { $in: post.comments } });
+          }
        
           await Post.findByIdAndDelete(postId);
     

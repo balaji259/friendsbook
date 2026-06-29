@@ -159,6 +159,10 @@ const verifyKey = async (req,res) => {
           
     
                // Verify the friendsbookKey
+               if (!user.friendsbookKey || !user.friendsbookKey.key) {
+                   console.log("No active key found for this user");
+                   return res.status(401).json({ error: 'No active Friendsbook key found for this account.' });
+               }
                const isMatch = await bcrypt.compare(friendsbookKey, user.friendsbookKey.key);
 
                console.log(friendsbookKey);

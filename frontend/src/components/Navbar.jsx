@@ -108,17 +108,14 @@ const Navbar = ({ username, profilePic }) => {
       <div className="flex items-center space-x-2 cursor-pointer" > 
 
 
-     {/* <div className="relative cursor-pointer mr-4" onClick={()=>{navigate('/notifications')}}>
-      <FaBell size={24} color="#3b5998" />
-
-    
+      <div className="relative cursor-pointer mr-4" onClick={()=>{navigate('/notifications')}}>
+        <FaBell size={24} color="#3b5998" />
         {notificationCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-bounce">
-              {notificationCount > 99 ? "99+" : notificationCount}
-            </span>
-          )}
-
-     </div> */}
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full animate-bounce">
+            {notificationCount > 99 ? "99+" : notificationCount}
+          </span>
+        )}
+      </div>
 
         {/* <img
           src={profilePicUrl}

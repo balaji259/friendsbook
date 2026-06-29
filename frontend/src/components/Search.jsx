@@ -6,15 +6,18 @@ import { fetchUserDetails } from "./userPosts.js";
 import {useSocket} from "./useSocket";
 import axios from "axios";
 import LoadingPage from "./Loading.jsx";
+import { useChatStore } from "./useChatStore";
 
 const Search = () => {
   const [currentuser, setCurrentUser] = useState({ username: "", profilePic: "" });
   const {user,setUser,socket,connectSocket}= useSocket();
+  const { setProfileId } = useChatStore();
   const backendBaseUrl="http://localhost:7000"; 
   const renderurl="https://socialmedia-backend-2njs.onrender.com";
 
 
   useEffect(() => {
+    setProfileId(null);
     const token = localStorage.getItem("token");
 
     const getUserDetails = async () => {
