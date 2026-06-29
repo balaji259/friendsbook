@@ -74,6 +74,7 @@ const SearchSuggestions = () => {
             userId: userId, 
             senderId: currentUserId,
             type: "Follow Notification",
+            title: "Follow Notification",
             body: "started following you"
           });
           console.log("Follow notification sent successfully!");

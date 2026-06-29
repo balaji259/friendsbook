@@ -1,4 +1,5 @@
 
+const mongoose = require("mongoose");
 const User=require("../models/users");
 const cloudinary = require('../cloudinaryConfig');
 const Message=require("../models/message");
@@ -10,14 +11,59 @@ const { getReceiverSocketId,io } = require("../socket");
 const getUsersForSideBar=async (req,res)=>{
     try{
         const loggedInUserId=req.user.id;
-        console.log("loggedInUserId");
-        console.log(loggedInUserId);
-        // const filteredUsers=await User.find({ _id: { $ne: loggedInUserId }}).select("-password");
-        const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select("_id username fullname email profilePic bio");
-        // console.log("filteredUsers");
-        // console.log(filteredUsers);
+        const loggedInUserObjectId = new mongoose.Types.ObjectId(loggedInUserId);
 
-        res.status(200).json(filteredUsers);
+        // Aggregate to find the latest message time with each user
+        const conversations = await Message.aggregate([
+            {
+                $match: {
+                    $or: [
+                        { senderId: loggedInUserObjectId },
+                        { receiverId: loggedInUserObjectId }
+                    ]
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        $cond: [
+                            { $eq: ["$senderId", loggedInUserObjectId] },
+                            "$receiverId",
+                            "$senderId"
+                        ]
+                    },
+                    lastMessageTime: { $max: "$createdAt" }
+                }
+            }
+        ]);
+
+        // Map userId string to last message time
+        const conversationMap = {};
+        conversations.forEach(conv => {
+            if (conv._id) {
+                conversationMap[conv._id.toString()] = conv.lastMessageTime;
+            }
+        });
+
+        // Get all users except loggedInUserId
+        const allUsers = await User.find({ _id: { $ne: loggedInUserId } })
+            .select("_id username fullname email profilePic bio")
+            .lean();
+
+        // Sort users: those with conversations sorted by lastMessageTime desc,
+        // then those without conversations (at the bottom).
+        const sortedUsers = allUsers.sort((a, b) => {
+            const timeA = conversationMap[a._id.toString()] ? new Date(conversationMap[a._id.toString()]).getTime() : 0;
+            const timeB = conversationMap[b._id.toString()] ? new Date(conversationMap[b._id.toString()]).getTime() : 0;
+
+            if (timeA !== timeB) {
+                return timeB - timeA; // Descending order of last message time
+            }
+            // Fallback: sort alphabetically by username
+            return a.username.localeCompare(b.username);
+        });
+
+        res.status(200).json(sortedUsers);
 
     }
     catch(e)

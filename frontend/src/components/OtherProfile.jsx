@@ -285,6 +285,7 @@ const OtherProfile = () => {
               userId: profileId,
               senderId: currentUserId,
               type: "Follow Notification",
+              title: "Follow Notification",
               body: "started following you"
             });
           } catch (err) {

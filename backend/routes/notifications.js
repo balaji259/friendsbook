@@ -74,7 +74,7 @@ router.get('/unread/count/:userId', async (req, res) => {
 // Create notification route
 router.post('/create', async (req, res) => {
   try {
-    const { userId, senderId, body, type } = req.body;
+    const { userId, senderId, body, type, title } = req.body;
     
     // Create notification in database
     const newNotification = new Notification({
@@ -82,6 +82,7 @@ router.post('/create', async (req, res) => {
       senderId,
       body,
       type,
+      title: title || type || "Notification",
       isRead: false 
     });
     

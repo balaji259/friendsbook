@@ -93,14 +93,14 @@ const Notifications = () => {
               </button>
               <div className="flex items-center gap-3">
                 <img
-                  src={notification.senderId.profilePic || '/default-profile.jpg'}
+                  src={notification.senderId?.profilePic || '/default-profile.jpg'}
                   alt="Profile"
                   className="w-10 h-10 rounded-full border border-gray-300 shadow-sm"
                 />
                 <div>
                   <p className="text-sm">
                     <span className="text-blue-600 font-semibold cursor-pointer">
-                      {notification.senderId.username}
+                      {notification.senderId?.username || 'Someone'}
                     </span>{' '}
                     {notification.body}
                   </p>
